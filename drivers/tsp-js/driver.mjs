@@ -5,11 +5,11 @@
 // package's built `dist`. Every message byte and digest comes from the library.
 //
 // Endpoint ops: tsp-js deliberately ships the relationship *rules* as pure
-// functions (relationship.ts: transition, resolveInviteRace, resolveCancel,
-// admitsApplicationMessage, canSend) and leaves *storage* to the wallet. The
-// driver therefore holds a Map as that storage and applies only those library
-// functions to it; it adds no rule of its own. In particular it performs no
-// accept-to-invite digest correlation, because the library offers none.
+// functions (relationship.ts: transition, resolveInviteRace, resolveAccept,
+// resolveCancel, admitsApplicationMessage, canSend) and leaves *storage* to the
+// wallet. The driver therefore holds a Map as that storage and applies only
+// those library functions to it; it adds no rule of its own. Builds without
+// `resolveAccept` get no accept-to-invite correlation.
 
 import { createInterface } from "node:readline";
 import { dirname, resolve } from "node:path";
@@ -302,6 +302,13 @@ async function opEndpoint(op, req) {
         return { ...base, event: "invite", digest: b64e(c.digest) };
       }
       if (c?.controlType === "accept") {
+        // `resolveAccept` (added with tswg-tsp-specification conformance work)
+        // correlates the accept with our invite. Older builds lack it and
+        // apply the transition unchecked, which the suite reports as a finding.
+        if (tsp.resolveAccept) {
+          const outcome = tsp.resolveAccept(r.state, c.inReplyTo, r.inviteDigest);
+          if (outcome.action === "ignore") throw new DriverError("relationship", outcome.reason);
+        }
         Object.assign(r, { state: tsp.transition(r.state, "receiveAccept"), replyDigest: c.digest });
         return { ...base, event: "accept", digest: b64e(c.inReplyTo), replyDigest: b64e(c.digest) };
       }
