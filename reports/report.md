@@ -1,8 +1,8 @@
 # TSP Rev 3 conformance report
 
-> Built from affinidi-tdk-rs `main` @ `e4a7686` (includes #803, #804), vta-browser-plugin `feat/tsp-rev2-rev3-dual-handler` @ `ac7e829` (includes #249, #250), affinidi-tsp-go and affinidi-tsp-dart `main`, and tsp_sdk 0.11.0 from crates.io.
+Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T14:30:05Z with key seed `20260916`.
 
-Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T13:07:47Z with key seed `20260916`.
+> **Note:** Built from affinidi-tdk-rs main @ 0e51187 (includes #803, #804, #806), vta-browser-plugin feat/tsp-rev2-rev3-dual-handler @ 88fc7a5 (includes #249, #250, #251), affinidi-tsp-go and affinidi-tsp-dart main, and tsp_sdk 0.11.0 from crates.io.
 
 Each case is **pass**, **fail** (with the diff), **skip** (a capability the implementation does not offer) or **error** (the harness or a driver broke). Cells read `✓ passed/ran` when nothing failed, `✗ passed/ran` when something did, `–` when every case skipped.
 
@@ -25,7 +25,7 @@ Local overrides in effect (`drivers.local.toml`, not committed):
 
 | Suite | Pass | Fail | Error | Skip |
 |---|---:|---:|---:|---:|
-| interop | 868 | 25 | 0 | 157 |
+| interop | 893 | 0 | 0 | 157 |
 | negative | 377 | 8 | 0 | 70 |
 | relationship | 250 | 0 | 0 | 0 |
 | vectors | 137 | 0 | 0 | 38 |
@@ -100,11 +100,11 @@ As each driver declares in `hello`. `pack only`/`open only` mark one-sided suppo
 
 | packs ↓ / opens → | affinidi-rust | reference-rust | tsp-js | go | dart |
 |---|---|---|---|---|---|
-| **affinidi-rust** | ✗ 40/41 | ✗ 40/41 | ✗ 31/33 | ✗ 40/41 | ✗ 40/41 |
-| **reference-rust** | ✗ 37/38 | ✓ 38/38 | ✗ 28/30 | ✓ 38/38 | ✓ 38/38 |
-| **tsp-js** | ✗ 20/22 | ✗ 20/22 | ✗ 20/22 | ✗ 20/22 | ✗ 20/22 |
-| **go** | ✗ 41/42 | ✓ 42/42 | ✗ 32/34 | ✓ 42/42 | ✓ 42/42 |
-| **dart** | ✗ 41/42 | ✓ 42/42 | ✗ 32/34 | ✓ 42/42 | ✓ 42/42 |
+| **affinidi-rust** | ✓ 41/41 | ✓ 41/41 | ✓ 33/33 | ✓ 41/41 | ✓ 41/41 |
+| **reference-rust** | ✓ 38/38 | ✓ 38/38 | ✓ 30/30 | ✓ 38/38 | ✓ 38/38 |
+| **tsp-js** | ✓ 22/22 | ✓ 22/22 | ✓ 22/22 | ✓ 22/22 | ✓ 22/22 |
+| **go** | ✓ 42/42 | ✓ 42/42 | ✓ 34/34 | ✓ 42/42 | ✓ 42/42 |
+| **dart** | ✓ 42/42 | ✓ 42/42 | ✓ 34/34 | ✓ 42/42 | ✓ 42/42 |
 
 <details><summary>Per case (42 cases × 25 pairs)</summary>
 
@@ -145,8 +145,8 @@ As each driver declares in `hello`. `pack only`/`open only` mark one-sided suppo
 | `hop/routed-2-hops` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `hop/routed-long-hop-list` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `rfi/hpke-base/long-reply-path` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `hop/routed-12-hops` | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ |
-| `hop/routed-17-hops` | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ | ✗ | ✓ | ✗ | ✓ | ✓ |
+| `hop/routed-12-hops` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `hop/routed-17-hops` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `hop/nested-mixed/inner-by-affinidi-rust` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `hop/nested-mixed/inner-by-reference-rust` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `hop/nested-mixed/inner-by-tsp-js` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -219,7 +219,6 @@ Failures attributed to an investigated root cause (`findings.toml`). *Kind*: `sp
 | 1 | tsp_sdk accepts a primitive whose lead bytes are non-zero | `spec-violation` | 1 |
 | 2 | tsp_sdk ignores bytes after the signature attachment; affinidi-tsp and tsp-js reject them | `disagreement` | 6 |
 | 3 | tsp_sdk does not check the ESSR sender field of a signed-only message | `disagreement` | 1 |
-| 4 | Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none | `limit` | 25 |
 
 ### 1. tsp_sdk accepts a primitive whose lead bytes are non-zero
 
@@ -277,48 +276,6 @@ accepted a message with essr-sender-mismatch (source direct-signed-only (re-sign
 <details><summary>Affected cases</summary>
 
 - `negative/resigned/direct-signed-only/essr-sender-mismatch` vector (re-signed) → reference-rust
-
-</details>
-
-### 4. Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none
-
-**Kind:** `limit` · **Spec:** §5.3: "the number of intermediaries in the route path may not be limited to 2"; no maximum is set
-
-tsp-js `cesr/wire.ts` `MAX_HOPS = 10`, enforced when packing (`packRouted`) and when decoding any VID list (`rev3/fields.ts` `decodeVidList`, which also reads Reply_Path). affinidi-tsp `message/routed.rs` `MAX_HOPS = 16`, enforced when packing and in `wire.rs` `decode_hops`. tsp_sdk sets none. So a 12-hop route packed by affinidi-tsp or tsp_sdk cannot be opened by tsp-js, and a 17-hop route packed by tsp_sdk cannot be opened by affinidi-tsp. A bound is reasonable; three different ones are not interoperable. The specification could state a minimum every receiver must accept.
-
-Observed in 25 case(s); for example `interop/hop/routed-17-hops` (affinidi-rust → affinidi-rust):
-
-```text
-affinidi-rust refused to pack: [malformed] invalid message: route has 17 hops, exceeds maximum of 16
-```
-
-<details><summary>Affected cases</summary>
-
-- `interop/hop/routed-17-hops` affinidi-rust → affinidi-rust
-- `interop/hop/routed-17-hops` affinidi-rust → reference-rust
-- `interop/hop/routed-12-hops` affinidi-rust → tsp-js
-- `interop/hop/routed-17-hops` affinidi-rust → tsp-js
-- `interop/hop/routed-17-hops` affinidi-rust → go
-- `interop/hop/routed-17-hops` affinidi-rust → dart
-- `interop/hop/routed-17-hops` reference-rust → affinidi-rust
-- `interop/hop/routed-12-hops` reference-rust → tsp-js
-- `interop/hop/routed-17-hops` reference-rust → tsp-js
-- `interop/hop/routed-12-hops` tsp-js → affinidi-rust
-- `interop/hop/routed-17-hops` tsp-js → affinidi-rust
-- `interop/hop/routed-12-hops` tsp-js → reference-rust
-- `interop/hop/routed-17-hops` tsp-js → reference-rust
-- `interop/hop/routed-12-hops` tsp-js → tsp-js
-- `interop/hop/routed-17-hops` tsp-js → tsp-js
-- `interop/hop/routed-12-hops` tsp-js → go
-- `interop/hop/routed-17-hops` tsp-js → go
-- `interop/hop/routed-12-hops` tsp-js → dart
-- `interop/hop/routed-17-hops` tsp-js → dart
-- `interop/hop/routed-17-hops` go → affinidi-rust
-- `interop/hop/routed-12-hops` go → tsp-js
-- `interop/hop/routed-17-hops` go → tsp-js
-- `interop/hop/routed-17-hops` dart → affinidi-rust
-- `interop/hop/routed-12-hops` dart → tsp-js
-- `interop/hop/routed-17-hops` dart → tsp-js
 
 </details>
 
