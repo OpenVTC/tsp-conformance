@@ -1,0 +1,23 @@
+name: tsp_driver_dart
+description: TSP conformance driver for affinidi_tsp (Dart).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  affinidi_tsp:
+    path: ../../../affinidi-tsp-dart
+  affinidi_tsp_pq:
+    path: ../../../affinidi-tsp-dart/pq
+
+dev_dependencies:
+  dart_flutter_team_lints: ^3.2.1
+  test: ^1.24.0
+
+# affinidi_tsp_pq depends on the hosted affinidi_tsp; point it at the same
+# local checkout the driver uses.
+dependency_overrides:
+  affinidi_tsp:
+    path: ../../../affinidi-tsp-dart

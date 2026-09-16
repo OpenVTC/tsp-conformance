@@ -48,6 +48,6 @@ enabled = true
 name = "dart"
 description = "affinidi_tsp (affinidi-tsp-dart), path dependency, with affinidi_tsp_pq"
 cwd = "drivers/dart"
-build = "dart pub get && dart compile exe bin/tsp_driver.dart -o build/tsp_driver"
+build = "dart pub get && mkdir -p build && dart compile exe bin/tsp_driver.dart -o build/tsp_driver"
 run = "build/tsp_driver"
 enabled = true
