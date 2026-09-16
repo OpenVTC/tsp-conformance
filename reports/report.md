@@ -1,8 +1,8 @@
 # TSP Rev 3 conformance report
 
-Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T14:30:05Z with key seed `20260916`.
+Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T16:50:41Z with key seed `20260916`.
 
-> **Note:** Built from affinidi-tdk-rs main @ 0e51187 (includes #803, #804, #806), vta-browser-plugin feat/tsp-rev2-rev3-dual-handler @ 88fc7a5 (includes #249, #250, #251), affinidi-tsp-go and affinidi-tsp-dart main, and tsp_sdk 0.11.0 from crates.io.
+> **Note:** Built from affinidi-tdk-rs main (test-vectors), vta-browser-plugin feat/tsp-rev2-rev3-dual-handler, affinidi-tsp-go and affinidi-tsp-dart main, tsp_sdk 0.11.0.
 
 Each case is **pass**, **fail** (with the diff), **skip** (a capability the implementation does not offer) or **error** (the harness or a driver broke). Cells read `✓ passed/ran` when nothing failed, `✗ passed/ran` when something did, `–` when every case skipped.
 
@@ -16,11 +16,6 @@ Each case is **pass**, **fail** (with the diff), **skip** (a capability the impl
 | go | affinidi-tsp-go | 0.1.0 | go | ran |
 | dart | affinidi-tsp-dart | 0.1.0 | dart | ran |
 
-Local overrides in effect (`drivers.local.toml`, not committed):
-
-- **affinidi-rust**: `AFFINIDI_TSP_PATH=~/devel/affinidi-tdk-rs-wt-tsprel/crates/messaging/affinidi-tsp`
-- **tsp-js**: `TSP_JS_DIR=~/devel/pnm-browser-plugin-wt-tsprel/packages/tsp-js`
-
 ## Summary
 
 | Suite | Pass | Fail | Error | Skip |
@@ -28,7 +23,7 @@ Local overrides in effect (`drivers.local.toml`, not committed):
 | interop | 893 | 0 | 0 | 157 |
 | negative | 377 | 8 | 0 | 70 |
 | relationship | 250 | 0 | 0 | 0 |
-| vectors | 137 | 0 | 0 | 38 |
+| vectors | 152 | 0 | 0 | 23 |
 
 ## Capability matrix
 
@@ -51,7 +46,7 @@ As each driver declares in `hello`. `pack only`/`open only` mark one-sided suppo
 | `payload.hop` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `padding` | ✓ | ✓ | — | ✓ | ✓ |
 | `payload-sender` | — | — | — | ✓ | ✓ |
-| `deterministic` | — | — | — | ✓ | ✓ |
+| `deterministic` | ✓ | — | ✓ | ✓ | ✓ |
 | `peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `endpoint` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | *not reported by `open`* | `payload.padding`, `payload.payloadSender` | `payload.nonce`, `payload.padding`, `payload.payloadSender`, `peek.version`, `version` | `payload.padding`, `payload.payloadSender` | — | — |
@@ -61,36 +56,36 @@ As each driver declares in `hello`. `pack only`/`open only` mark one-sided suppo
 | Case | affinidi-rust | reference-rust | tsp-js | go | dart |
 |---|:-:|:-:|:-:|:-:|:-:|
 | `control-rfa-direct/open` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `control-rfa-direct/pack-exact` | – | – | – | ✓ | ✓ |
+| `control-rfa-direct/pack-exact` | ✓ | – | ✓ | ✓ | ✓ |
 | `control-rfa-direct/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `control-rfd/open` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `control-rfd/pack-exact` | – | – | – | ✓ | ✓ |
+| `control-rfd/pack-exact` | ✓ | – | ✓ | ✓ | ✓ |
 | `control-rfd/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `control-rfi-direct/open` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `control-rfi-direct/pack-exact` | – | – | – | ✓ | ✓ |
+| `control-rfi-direct/pack-exact` | ✓ | – | ✓ | ✓ | ✓ |
 | `control-rfi-direct/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `control-rfi-sealed-box/open` | ✓ | ✓ | – | ✓ | ✓ |
-| `control-rfi-sealed-box/pack-exact` | – | – | – | ✓ | ✓ |
+| `control-rfi-sealed-box/pack-exact` | ✓ | – | – | ✓ | ✓ |
 | `control-rfi-sealed-box/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `direct-hpke-base/open` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `direct-hpke-base/pack-exact` | – | – | – | ✓ | ✓ |
+| `direct-hpke-base/pack-exact` | ✓ | – | ✓ | ✓ | ✓ |
 | `direct-hpke-base/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `direct-hpke-base-pq/open` | ✓ | ✓ | – | ✓ | ✓ |
 | `direct-hpke-base-pq/pack-exact` | – | – | – | – | – |
 | `direct-hpke-base-pq/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `direct-sealed-box/open` | ✓ | ✓ | – | ✓ | ✓ |
-| `direct-sealed-box/pack-exact` | – | – | – | ✓ | ✓ |
+| `direct-sealed-box/pack-exact` | ✓ | – | – | ✓ | ✓ |
 | `direct-sealed-box/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `direct-signed-only/open` | ✓ | ✓ | – | ✓ | ✓ |
-| `direct-signed-only/pack-exact` | – | ✓ | – | ✓ | ✓ |
+| `direct-signed-only/pack-exact` | ✓ | ✓ | – | ✓ | ✓ |
 | `direct-signed-only/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `nested-direct/open` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `nested-direct/inner-open` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `nested-direct/pack-exact` | – | – | – | ✓ | ✓ |
+| `nested-direct/pack-exact` | ✓ | – | ✓ | ✓ | ✓ |
 | `nested-direct/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `routed/open` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `routed/inner-open` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `routed/pack-exact` | – | – | – | ✓ | ✓ |
+| `routed/pack-exact` | ✓ | – | ✓ | ✓ | ✓ |
 | `routed/peek` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `direct-signed-only/resigned/minor-ABA-accepted` | ✓ | ✓ | – | ✓ | ✓ |
 | `direct-signed-only/resigned/minor-AAD-accepted` | ✓ | ✓ | – | ✓ | ✓ |
@@ -304,15 +299,13 @@ Correct rejections under an error code other than the one expected (the specific
 | tsp-js lacks signed-only:open | 33 |
 | tsp-js lacks sealed-box:open | 32 |
 | tsp-js lacks hpke-pq:open | 23 |
+| tsp-js lacks sealed-box:pack | 22 |
 | mutation not applicable to this source | 20 |
-| tsp-js lacks sealed-box:pack | 20 |
 | tsp-js lacks signed-only:pack | 11 |
 | reference-rust pack: unsupported — padding is reachable only for scs/ctl/pad (SecureStore SendOptions) | 10 |
 | tsp-js lacks hpke-pq:pack | 10 |
-| affinidi-rust lacks deterministic | 8 |
 | reference-rust lacks deterministic | 8 |
-| tsp-js lacks deterministic | 8 |
-| affinidi-rust pack: unsupported — affinidi-tsp always carries the sender VID in the payload; NULL cannot be requested | 6 |
+| affinidi-rust pack: unsupported — affinidi-tsp always carries the sender VID in the payload; NULL cannot be requested | 5 |
 | reference-rust lacks rfi.referral:pack | 5 |
 | reference-rust pack: unsupported — tsp_sdk chooses the ESSR sender field by scheme (NULL under HPKE-Base and signed-only) | 5 |
 | the vector publishes no ephemeral material (spec: the hybrid KEM draws encapsulation randomness) | 5 |
@@ -320,5 +313,5 @@ Correct rejections under an error code other than the one expected (the specific
 | tsp-js lacks payload.pad:pack | 5 |
 | tsp-js lacks payload.pad:pack, padding:pack | 5 |
 | tsp-js lacks rfi.referral:pack | 5 |
-| tsp-js pack: unsupported — tsp-js always writes the sender VID in the ESSR field | 5 |
+| tsp-js pack: unsupported — tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral | 5 |
 | a re-signed but untouched signed-only rfi does not open here ([unsupported] payload type is not supported by this implementation) | 1 |

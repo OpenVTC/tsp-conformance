@@ -1,7 +1,7 @@
 {
   "tool": "tsp-conformance 0.1.0",
-  "generatedAt": "2026-09-16T14:30:05Z",
-  "note": "Built from affinidi-tdk-rs main @ 0e51187 (includes #803, #804, #806), vta-browser-plugin feat/tsp-rev2-rev3-dual-handler @ 88fc7a5 (includes #249, #250, #251), affinidi-tsp-go and affinidi-tsp-dart main, and tsp_sdk 0.11.0 from crates.io.",
+  "generatedAt": "2026-09-16T16:50:41Z",
+  "note": "Built from affinidi-tdk-rs main (test-vectors), vta-browser-plugin feat/tsp-rev2-rev3-dual-handler, affinidi-tsp-go and affinidi-tsp-dart main, tsp_sdk 0.11.0.",
   "seed": 20260916,
   "spec": {
     "commit": "f5b8668",
@@ -19,9 +19,6 @@
     {
       "name": "affinidi-rust",
       "description": "affinidi-tsp (affinidi-tdk-rs), path dependency, feature pq",
-      "overrides": [
-        "AFFINIDI_TSP_PATH=~/devel/affinidi-tdk-rs-wt-tsprel/crates/messaging/affinidi-tsp"
-      ],
       "status": "ran",
       "hello": {
         "capabilities": [
@@ -40,7 +37,8 @@
           "payload.hop",
           "padding",
           "peek",
-          "endpoint"
+          "endpoint",
+          "deterministic"
         ],
         "language": "rust",
         "name": "affinidi-tsp",
@@ -48,6 +46,7 @@
         "version": "0.2.0"
       },
       "capabilities": [
+        "deterministic",
         "endpoint",
         "hpke-base",
         "hpke-pq",
@@ -118,9 +117,6 @@
     {
       "name": "tsp-js",
       "description": "@openvtc/vti-tsp-js (pnm-browser-plugin/packages/tsp-js), built dist",
-      "overrides": [
-        "TSP_JS_DIR=~/devel/pnm-browser-plugin-wt-tsprel/packages/tsp-js"
-      ],
       "status": "ran",
       "hello": {
         "capabilities": [
@@ -135,7 +131,8 @@
           "rfi.referral:open",
           "payload.hop",
           "peek",
-          "endpoint"
+          "endpoint",
+          "deterministic"
         ],
         "language": "typescript",
         "name": "@openvtc/vti-tsp-js",
@@ -143,6 +140,7 @@
         "version": "0.3.0"
       },
       "capabilities": [
+        "deterministic",
         "endpoint",
         "hpke-base",
         "payload.ctl:open",
@@ -283,9 +281,9 @@
       "error": 0
     },
     "vectors": {
-      "pass": 137,
+      "pass": 152,
       "fail": 0,
-      "skip": 38,
+      "skip": 23,
       "error": 0
     }
   },
@@ -404,8 +402,8 @@
       "spec": "A; §7.2.2, §9.4.2",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -435,8 +433,8 @@
       "spec": "A; §7.3, §9.4.5",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -466,8 +464,8 @@
       "spec": "A; §7.2.1, §7.2.2, §9.4.1",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -497,8 +495,8 @@
       "spec": "A; §7.2.1, §8, §9.4.1",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -528,8 +526,8 @@
       "spec": "A; §8.2, §9.1, §9.2.8",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -590,8 +588,8 @@
       "spec": "A; §8.3, §9.1, §9.2.8, §9.5",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -621,8 +619,8 @@
       "spec": "A; §3.5, §9.1",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust pack: unsupported — affinidi-tsp always carries the sender VID in the payload; NULL cannot be requested"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -665,8 +663,8 @@
       "spec": "A; §4, §9.4.15",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -709,8 +707,8 @@
       "spec": "A; §5.2, §5.3.3, §9.4.16",
       "sender": "spec",
       "receiver": "affinidi-rust",
-      "status": "skip",
-      "detail": "affinidi-rust lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -1201,8 +1199,8 @@
       "spec": "A; §7.2.2, §9.4.2",
       "sender": "spec",
       "receiver": "tsp-js",
-      "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -1232,8 +1230,8 @@
       "spec": "A; §7.3, §9.4.5",
       "sender": "spec",
       "receiver": "tsp-js",
-      "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -1263,8 +1261,8 @@
       "spec": "A; §7.2.1, §7.2.2, §9.4.1",
       "sender": "spec",
       "receiver": "tsp-js",
-      "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -1291,7 +1289,7 @@
       "sender": "spec",
       "receiver": "tsp-js",
       "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "detail": "tsp-js lacks sealed-box:pack"
     },
     {
       "suite": "vectors",
@@ -1321,8 +1319,8 @@
       "spec": "A; §8.2, §9.1, §9.2.8",
       "sender": "spec",
       "receiver": "tsp-js",
-      "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -1376,7 +1374,7 @@
       "sender": "spec",
       "receiver": "tsp-js",
       "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "detail": "tsp-js lacks sealed-box:pack"
     },
     {
       "suite": "vectors",
@@ -1446,8 +1444,8 @@
       "spec": "A; §4, §9.4.15",
       "sender": "spec",
       "receiver": "tsp-js",
-      "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -1490,8 +1488,8 @@
       "spec": "A; §5.2, §5.3.3, §9.4.16",
       "sender": "spec",
       "receiver": "tsp-js",
-      "status": "skip",
-      "detail": "tsp-js lacks deterministic"
+      "status": "pass",
+      "detail": ""
     },
     {
       "suite": "vectors",
@@ -6522,7 +6520,7 @@
       "sender": "tsp-js",
       "receiver": "affinidi-rust",
       "status": "skip",
-      "detail": "tsp-js pack: unsupported — tsp-js always writes the sender VID in the ESSR field"
+      "detail": "tsp-js pack: unsupported — tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral"
     },
     {
       "suite": "interop",
@@ -6935,7 +6933,7 @@
       "sender": "tsp-js",
       "receiver": "reference-rust",
       "status": "skip",
-      "detail": "tsp-js pack: unsupported — tsp-js always writes the sender VID in the ESSR field"
+      "detail": "tsp-js pack: unsupported — tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral"
     },
     {
       "suite": "interop",
@@ -7364,7 +7362,7 @@
       "sender": "tsp-js",
       "receiver": "tsp-js",
       "status": "skip",
-      "detail": "tsp-js pack: unsupported — tsp-js always writes the sender VID in the ESSR field"
+      "detail": "tsp-js pack: unsupported — tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral"
     },
     {
       "suite": "interop",
@@ -7757,7 +7755,7 @@
       "sender": "tsp-js",
       "receiver": "go",
       "status": "skip",
-      "detail": "tsp-js pack: unsupported — tsp-js always writes the sender VID in the ESSR field"
+      "detail": "tsp-js pack: unsupported — tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral"
     },
     {
       "suite": "interop",
@@ -8090,7 +8088,7 @@
       "sender": "tsp-js",
       "receiver": "dart",
       "status": "skip",
-      "detail": "tsp-js pack: unsupported — tsp-js always writes the sender VID in the ESSR field"
+      "detail": "tsp-js pack: unsupported — tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral"
     },
     {
       "suite": "interop",
@@ -18464,7 +18462,7 @@
       "sender": "affinidi-rust",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "found after 47 invite pair(s): raw order and qb64 text order disagree"
+      "detail": "found after 15 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18473,7 +18471,7 @@
       "sender": "affinidi-rust",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-49c73334.conformance.example answers an invite we did not send"
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-9e2b54e4.conformance.example answers an invite we did not send"
     },
     {
       "suite": "relationship",
@@ -18491,7 +18489,7 @@
       "sender": "affinidi-rust",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-3b38225d.conformance.example to did:web:endpoint-b-dc0c84fc.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-ad02124f.conformance.example to did:web:endpoint-b-0d661efe.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
@@ -18553,6 +18551,276 @@
       "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
       "sender": "affinidi-rust",
       "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 45 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-80935f5d.conformance.example answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] application message in state none"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 84 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-cf729fb5.conformance.example answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-81f86364.conformance.example\" without a relationship"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 143 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-d2e91aea.conformance.example answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-1a18c00a.conformance.example (state none)"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
       "status": "pass",
       "detail": "found after 37 invite pair(s): raw order and qb64 text order disagree"
     },
@@ -18561,279 +18829,9 @@
       "case": "accept-unknown-digest-refused",
       "spec": "§7.2.2",
       "sender": "affinidi-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-0378821e.conformance.example answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] application message in state none"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "found after 98 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-768557c8.conformance.example answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-1cc61ff9.conformance.example\" without a relationship"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": "found after 6 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-dba94bae.conformance.example answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "affinidi-rust",
       "receiver": "dart",
       "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-61b757c9.conformance.example (state none)"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "found after 107 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "affinidi-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-651ef11f.conformance.example answers an invite we did not send"
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-63a73b6a.conformance.example answers an invite we did not send"
     },
     {
       "suite": "relationship",
@@ -18851,7 +18849,7 @@
       "sender": "reference-rust",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-64c5010b.conformance.example with no relationship to did:web:endpoint-b-e1685275.conformance.example"
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-8a83b8a5.conformance.example with no relationship to did:web:endpoint-b-c858fc18.conformance.example"
     },
     {
       "suite": "relationship",
@@ -18913,276 +18911,6 @@
       "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
       "sender": "reference-rust",
       "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "found after 9 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-3a3dd524.conformance.example to did:web:endpoint-b-1594adb9.conformance.example; the message is dropped"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "found after 24 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] application message in state none"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "found after 32 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-c3b89fa5.conformance.example\" without a relationship"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "reference-rust",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "reference-rust",
-      "receiver": "go",
       "status": "pass",
       "detail": "found after 5 invite pair(s): raw order and qb64 text order disagree"
     },
@@ -19191,7 +18919,7 @@
       "case": "accept-unknown-digest-refused",
       "spec": "§7.2.2",
       "sender": "reference-rust",
-      "receiver": "go",
+      "receiver": "affinidi-rust",
       "status": "pass",
       "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
     },
@@ -19200,186 +18928,6 @@
       "case": "invite-accept-bidirectional",
       "spec": "§7.2.1, §7.2.2",
       "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-c449e8e7.conformance.example (state none)"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "found after 2 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "reference-rust",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-32b2e962.conformance.example with no relationship to did:web:endpoint-b-dbf2f13a.conformance.example"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "found after 130 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "tsp-js",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
@@ -19388,16 +18936,16 @@
       "suite": "relationship",
       "case": "message-before-relationship-refused",
       "spec": "§7.2.2",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-3f97d35c.conformance.example to did:web:endpoint-b-6df67153.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-ac198dcd.conformance.example to did:web:endpoint-b-2e35758c.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
       "case": "cancel-returns-to-none",
       "spec": "§7.3",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
@@ -19406,7 +18954,7 @@
       "suite": "relationship",
       "case": "cancel-by-inviter-naming-invite-digest",
       "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
@@ -19415,7 +18963,7 @@
       "suite": "relationship",
       "case": "cancel-by-inviter-naming-accept-digest",
       "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
@@ -19424,7 +18972,7 @@
       "suite": "relationship",
       "case": "cancel-by-accepter-naming-invite-digest",
       "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
@@ -19433,7 +18981,7 @@
       "suite": "relationship",
       "case": "cancel-by-accepter-naming-accept-digest",
       "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
@@ -19442,7 +18990,7 @@
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
       "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
@@ -19451,548 +18999,8 @@
       "suite": "relationship",
       "case": "invite-race-raw-byte-order",
       "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "tsp-js",
+      "sender": "reference-rust",
       "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "found after 6 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] application message in state none"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "found after 161 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-2a9b1365.conformance.example\" without a relationship"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": "found after 13 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "go",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-e0d6fc0b.conformance.example (state none)"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "found after 64 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "tsp-js",
-      "receiver": "dart",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-871e88d4.conformance.example with no relationship to did:web:endpoint-b-bfe04ad9.conformance.example"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "found after 54 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "go",
-      "receiver": "affinidi-rust",
-      "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: accept does not answer an outstanding invite"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-22ca77c7.conformance.example to did:web:endpoint-b-5ae2419f.conformance.example; the message is dropped"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "found after 5 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "go",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: accept does not answer an outstanding invite"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] application message in state none"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "go",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "go",
-      "receiver": "tsp-js",
       "status": "pass",
       "detail": "found after 106 invite pair(s): raw order and qb64 text order disagree"
     },
@@ -20000,6 +19008,996 @@
       "suite": "relationship",
       "case": "accept-unknown-digest-refused",
       "spec": "§7.2.2",
+      "sender": "reference-rust",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] application message in state none"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 21 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-02a928e3.conformance.example\" without a relationship"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 20 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-ce5e7be9.conformance.example (state none)"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "found after 103 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "reference-rust refused: [relationship] Relationship Error: thread_id does not match digest"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-15712040.conformance.example with no relationship to did:web:endpoint-b-00f08a31.conformance.example"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "found after 45 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-7f41ea3b.conformance.example to did:web:endpoint-b-16a34965.conformance.example; the message is dropped"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 22 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] application message in state none"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 27 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-ba70c36a.conformance.example\" without a relationship"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 3 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-d152b891.conformance.example (state none)"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "found after 43 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] answers an invite we did not send"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-98be8a2b.conformance.example with no relationship to did:web:endpoint-b-15c6d7ee.conformance.example"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "found after 6 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "go refused: [relationship] tsp: relationship: accept does not answer an outstanding invite"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-4458ad35.conformance.example to did:web:endpoint-b-6058006f.conformance.example; the message is dropped"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 40 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "go refused: [relationship] tsp: relationship: accept does not answer an outstanding invite"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] application message in state none"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 15 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
       "sender": "go",
       "receiver": "tsp-js",
       "status": "pass",
@@ -20021,7 +20019,7 @@
       "sender": "go",
       "receiver": "go",
       "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-400b858c.conformance.example\" without a relationship"
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-68065df2.conformance.example\" without a relationship"
     },
     {
       "suite": "relationship",
@@ -20084,7 +20082,7 @@
       "sender": "go",
       "receiver": "go",
       "status": "pass",
-      "detail": "found after 76 invite pair(s): raw order and qb64 text order disagree"
+      "detail": "found after 111 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -20111,7 +20109,7 @@
       "sender": "go",
       "receiver": "dart",
       "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-d3a13647.conformance.example (state none)"
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-786e606e.conformance.example (state none)"
     },
     {
       "suite": "relationship",
@@ -20174,7 +20172,7 @@
       "sender": "go",
       "receiver": "dart",
       "status": "pass",
-      "detail": "found after 64 invite pair(s): raw order and qb64 text order disagree"
+      "detail": "found after 23 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -20201,7 +20199,7 @@
       "sender": "dart",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-0acc3214.conformance.example with no relationship to did:web:endpoint-b-439db02f.conformance.example"
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-3b55fd96.conformance.example with no relationship to did:web:endpoint-b-496f750f.conformance.example"
     },
     {
       "suite": "relationship",
@@ -20264,7 +20262,7 @@
       "sender": "dart",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "found after 48 invite pair(s): raw order and qb64 text order disagree"
+      "detail": "found after 19 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -20291,7 +20289,7 @@
       "sender": "dart",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-4a6978f5.conformance.example to did:web:endpoint-b-7ee98642.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-d21d25ca.conformance.example to did:web:endpoint-b-4ed1f9fa.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
@@ -20353,6 +20351,96 @@
       "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
       "sender": "dart",
       "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 16 invite pair(s): raw order and qb64 text order disagree"
+    },
+    {
+      "suite": "relationship",
+      "case": "accept-unknown-digest-refused",
+      "spec": "§7.2.2",
+      "sender": "dart",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "dart refused: [relationship] the accept matches no outstanding invite"
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-accept-bidirectional",
+      "spec": "§7.2.1, §7.2.2",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "message-before-relationship-refused",
+      "spec": "§7.2.2",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "tsp-js refused: [relationship] application message in state none"
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-returns-to-none",
+      "spec": "§7.3",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-inviter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-invite-digest",
+      "spec": "§7.2.2, §7.3",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "cancel-by-accepter-naming-accept-digest",
+      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "rfi-race-lower-digest-wins",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "dart",
+      "receiver": "tsp-js",
       "status": "pass",
       "detail": "found after 27 invite pair(s): raw order and qb64 text order disagree"
     },
@@ -20361,96 +20449,6 @@
       "case": "accept-unknown-digest-refused",
       "spec": "§7.2.2",
       "sender": "dart",
-      "receiver": "reference-rust",
-      "status": "pass",
-      "detail": "dart refused: [relationship] the accept matches no outstanding invite"
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-accept-bidirectional",
-      "spec": "§7.2.1, §7.2.2",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "message-before-relationship-refused",
-      "spec": "§7.2.2",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "tsp-js refused: [relationship] application message in state none"
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-returns-to-none",
-      "spec": "§7.3",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-inviter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-invite-digest",
-      "spec": "§7.2.2, §7.3",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "cancel-by-accepter-naming-accept-digest",
-      "spec": "§7.2.2 (Reply_Digest recorded by both), §7.3",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": ""
-    },
-    {
-      "suite": "relationship",
-      "case": "invite-race-raw-byte-order",
-      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
-      "sender": "dart",
-      "receiver": "tsp-js",
-      "status": "pass",
-      "detail": "found after 12 invite pair(s): raw order and qb64 text order disagree"
-    },
-    {
-      "suite": "relationship",
-      "case": "accept-unknown-digest-refused",
-      "spec": "§7.2.2",
-      "sender": "dart",
       "receiver": "tsp-js",
       "status": "pass",
       "detail": "dart refused: [relationship] the accept matches no outstanding invite"
@@ -20471,7 +20469,7 @@
       "sender": "dart",
       "receiver": "go",
       "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-237693a6.conformance.example\" without a relationship"
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-9462f1cc.conformance.example\" without a relationship"
     },
     {
       "suite": "relationship",
@@ -20534,7 +20532,7 @@
       "sender": "dart",
       "receiver": "go",
       "status": "pass",
-      "detail": "found after 75 invite pair(s): raw order and qb64 text order disagree"
+      "detail": "found after 26 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -20561,7 +20559,7 @@
       "sender": "dart",
       "receiver": "dart",
       "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-1fc83e06.conformance.example (state none)"
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-36e455f5.conformance.example (state none)"
     },
     {
       "suite": "relationship",
@@ -20624,7 +20622,7 @@
       "sender": "dart",
       "receiver": "dart",
       "status": "pass",
-      "detail": "found after 78 invite pair(s): raw order and qb64 text order disagree"
+      "detail": "found after 44 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
