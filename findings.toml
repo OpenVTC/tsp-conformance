@@ -10,7 +10,10 @@
 #   kind: "spec-violation"   an implementation contradicts a MUST
 #         "disagreement"     implementations differ where the spec is silent or ambiguous
 #         "limit"            an implementation-chosen bound the spec does not set
-#         "api-gap"          the library cannot do what the protocol needs; integrators must
+#         "api-gap"          the library cannot do what the protocol needs; integrators must add it themselves
+#
+#   fixed: where the cause was fixed. A failure matching a fixed finding is a
+#          regression, and `--gate known` (the CI gate) fails on it.
 
 [[finding]]
 id = "sdk-non-canonical-lead-bytes"
@@ -62,6 +65,7 @@ variants, so this is a gap to close in the spec as much as a behaviour to align.
 
 [[finding]]
 id = "xscs-body-not-single-bytes"
+fixed = "affinidi-tdk-rs#803, vta-browser-plugin#249, affinidi-tsp-go and affinidi-tsp-dart main"
 kind = "disagreement"
 title = "An XSCS body other than exactly one Bytes primitive is accepted (tswg-tsp-specification#77)"
 match = ["xscs-body-", "data-after-payload-fields"]
@@ -71,6 +75,7 @@ Three bodies are derived from the `direct-signed-only` vector and re-signed with
 
 [[finding]]
 id = "affinidi-accepter-forgets-reply-digest"
+fixed = "affinidi-tdk-rs#804"
 kind = "spec-violation"
 title = "affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest"
 implementation = "affinidi-rust"
@@ -105,6 +110,7 @@ could state a minimum every receiver must accept."""
 
 [[finding]]
 id = "tsp-js-accept-correlation"
+fixed = "vta-browser-plugin#250 (resolveAccept)"
 kind = "api-gap"
 title = "tsp-js's relationship rules accept an RFA that names an invite never sent"
 implementation = "tsp-js"

@@ -69,6 +69,18 @@ struct Args {
     /// Known root causes used to group failures in the report.
     #[arg(long, default_value = "findings.toml")]
     findings: PathBuf,
+    /// What makes the exit status non-zero. `all`: any failing case. `known`:
+    /// only a failure no finding in `findings.toml` explains, or a driver that
+    /// did not run — the CI gate, which catches regressions and new
+    /// disagreements without going red on already-investigated ones.
+    #[arg(long, value_enum, default_value_t = Gate::All)]
+    gate: Gate,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+enum Gate {
+    All,
+    Known,
 }
 
 fn now_rfc3339() -> String {
@@ -301,7 +313,45 @@ fn main() {
         eprintln!("{s:13} pass {:4}  fail {:4}  error {:3}  skip {:4}", c.pass, c.fail, c.error, c.skip);
     }
     eprintln!("reports: {} {}", args.json.display(), args.markdown.display());
-    std::process::exit(if failed > 0 { 1 } else { 0 });
+    let red = match args.gate {
+        Gate::All => failed > 0,
+        Gate::Known => {
+            let fixed = |id: &str| rep.findings.iter().any(|f| f.id == id && f.fixed.is_some());
+            let unexplained: Vec<_> = rep
+                .results
+                .iter()
+                .filter(|r| matches!(r.status, result::Status::Fail | result::Status::Error))
+                .filter(|r| r.finding.as_deref().is_none_or(fixed))
+                .collect();
+            for r in &unexplained {
+                let why = match &r.finding {
+                    Some(id) => format!("REGRESSION ({id})"),
+                    None => "UNEXPLAINED".to_string(),
+                };
+                eprintln!("{why}  {} [{} -> {}] {}", r.case, r.sender, r.receiver, r.detail);
+            }
+            let not_run: Vec<_> = rep.drivers.iter().filter(|d| d.status != "ran").collect();
+            for d in &not_run {
+                eprintln!("DRIVER NOT RUN  {}: {}", d.name, d.reason);
+            }
+            let stale: Vec<_> = rep
+                .findings
+                .iter()
+                .filter(|f| f.fixed.is_none() && !f.patterns.is_empty())
+                .filter(|f| !rep.results.iter().any(|r| r.finding.as_deref() == Some(f.id.as_str())))
+                .collect();
+            for f in &stale {
+                eprintln!("note: finding {} matched no failure this run (fixed?)", f.id);
+            }
+            eprintln!(
+                "gate known: {} unexplained or regressed failure(s), {} driver(s) not run",
+                unexplained.len(),
+                not_run.len()
+            );
+            !unexplained.is_empty() || !not_run.is_empty()
+        }
+    };
+    std::process::exit(if red { 1 } else { 0 });
 }
 
 fn write_out(path: &Path, text: &str) {

@@ -55,6 +55,10 @@ pub struct Finding {
     pub spec: String,
     #[serde(default)]
     pub explanation: String,
+    /// Where the cause was fixed (e.g. a merged PR). A failure attributed to a
+    /// fixed finding is a regression: `--gate known` does not excuse it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fixed: Option<String>,
 }
 
 #[derive(Deserialize)]

@@ -113,6 +113,25 @@ skipped, and the report says why.
 - **Warnings** (a correct rejection under an unexpected error code) and **skip
   reasons**.
 
+## CI and the gate
+
+`.github/workflows/conformance.yml` checks out all four implementation repos
+next to the suite, builds every driver from source and runs the full matrix on
+every push and pull request, weekly, and on demand (with a ref per repo). The
+seed is the run id, so each run uses fresh keys and the report says which.
+
+CI runs with `--gate known`. `make run` keeps the default `--gate all`, which is
+non-zero on any failure. `known` is non-zero only when:
+
+- a failure matches no finding in `findings.toml` — a new disagreement, which
+  needs investigating and either a fix or a new finding;
+- a failure matches a finding marked `fixed` — a regression;
+- a driver did not build or start.
+
+Findings that matched nothing are printed as a note, since the cause may have
+been fixed upstream; mark them `fixed = "<where>"` so that a recurrence fails.
+The report and driver logs are uploaded as the `conformance-report` artifact.
+
 ## Adding an implementation
 
 1. Create `drivers/<name>/` with a program that reads one JSON request per line
