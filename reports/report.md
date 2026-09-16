@@ -1,8 +1,6 @@
 # TSP Rev 3 conformance report
 
-Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T11:31:43Z with key seed `20260916`.
-
-> **Note:** This run builds affinidi-tsp and tsp-js from the unpushed #77 fix branches (affinidi-tdk-rs-wt-tsp77 fix/tsp-app-payload-single-bytes, pnm-browser-plugin-wt-tsp77) via drivers.local.toml, and the Go and Dart libraries at 815e3fe / f24ecc2; tsp_sdk is 0.11.0 from crates.io. Committed drivers.toml still points at the normal checkouts.
+Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T12:32:19Z with key seed `20260916`.
 
 Each case is **pass**, **fail** (with the diff), **skip** (a capability the implementation does not offer) or **error** (the harness or a driver broke). Cells read `✓ passed/ran` when nothing failed, `✗ passed/ran` when something did, `–` when every case skipped.
 
@@ -18,8 +16,8 @@ Each case is **pass**, **fail** (with the diff), **skip** (a capability the impl
 
 Local overrides in effect (`drivers.local.toml`, not committed):
 
-- **affinidi-rust**: `AFFINIDI_TSP_PATH=/Users/glenngore/devel/affinidi-tdk-rs-wt-tsp77/crates/messaging/affinidi-tsp`
-- **tsp-js**: `TSP_JS_DIR=/Users/glenngore/devel/pnm-browser-plugin-wt-tsp77/packages/tsp-js`
+- **affinidi-rust**: `AFFINIDI_TSP_PATH=/Users/glenngore/devel/affinidi-tdk-rs-wt-tsprel/crates/messaging/affinidi-tsp`
+- **tsp-js**: `TSP_JS_DIR=/Users/glenngore/devel/pnm-browser-plugin-wt-tsprel/packages/tsp-js`
 
 ## Summary
 
@@ -27,7 +25,7 @@ Local overrides in effect (`drivers.local.toml`, not committed):
 |---|---:|---:|---:|---:|
 | interop | 868 | 25 | 0 | 157 |
 | negative | 377 | 8 | 0 | 70 |
-| relationship | 239 | 11 | 0 | 0 |
+| relationship | 250 | 0 | 0 | 0 |
 | vectors | 137 | 0 | 0 | 38 |
 
 ## Capability matrix
@@ -187,11 +185,11 @@ Aggregated over the message sources (the implementation's own output and the App
 
 | A ↓ / B → | affinidi-rust | reference-rust | tsp-js | go | dart |
 |---|---|---|---|---|---|
-| **affinidi-rust** | ✗ 9/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
-| **reference-rust** | ✗ 9/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
-| **tsp-js** | ✗ 8/10 | ✗ 9/10 | ✗ 9/10 | ✗ 9/10 | ✗ 9/10 |
-| **go** | ✗ 8/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
-| **dart** | ✗ 9/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **affinidi-rust** | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **reference-rust** | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **tsp-js** | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **go** | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **dart** | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
 
 <details><summary>Per case (10 cases × 25 pairs)</summary>
 
@@ -199,14 +197,14 @@ Aggregated over the message sources (the implementation's own output and the App
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | `invite-accept-bidirectional` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `message-before-relationship-refused` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `cancel-returns-to-none` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `cancel-returns-to-none` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `cancel-by-inviter-naming-invite-digest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `cancel-by-inviter-naming-accept-digest` | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ | ✓ |
+| `cancel-by-inviter-naming-accept-digest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `cancel-by-accepter-naming-invite-digest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `cancel-by-accepter-naming-accept-digest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `rfi-race-lower-digest-wins` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `invite-race-raw-byte-order` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `accept-unknown-digest-refused` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `accept-unknown-digest-refused` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 </details>
 
@@ -219,9 +217,7 @@ Failures attributed to an investigated root cause (`findings.toml`). *Kind*: `sp
 | 1 | tsp_sdk accepts a primitive whose lead bytes are non-zero | `spec-violation` | 1 |
 | 2 | tsp_sdk ignores bytes after the signature attachment; affinidi-tsp and tsp-js reject them | `disagreement` | 6 |
 | 3 | tsp_sdk does not check the ESSR sender field of a signed-only message | `disagreement` | 1 |
-| 4 | affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest | `spec-violation` | 6 |
-| 5 | Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none | `limit` | 25 |
-| 6 | tsp-js's relationship rules accept an RFA that names an invite never sent | `api-gap` | 5 |
+| 4 | Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none | `limit` | 25 |
 
 ### 1. tsp_sdk accepts a primitive whose lead bytes are non-zero
 
@@ -282,30 +278,7 @@ accepted a message with essr-sender-mismatch (source direct-signed-only (re-sign
 
 </details>
 
-### 4. affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest
-
-**Kind:** `spec-violation` · **Spec:** §7.2.2: "The Digest is recorded by both endpoints … and similarly Reply_Digest"; §7.3: the RFD Digest is "the previously received Digest or Reply_Digest"
-
-After invite → accept, the inviter's library packs an RFD naming the accept's own digest (Reply_Digest — the digest the inviter *received*) and it is delivered to affinidi-tsp's `TspAgent`, which refuses it ("message discarded: cancellation from … names an unrecognised relationship") and stays bidirectional. The same RFD naming the invite's digest is accepted, and tsp_sdk and tsp-js accept both. Cause: `TspAgent::send_relationship_accept` (lib.rs) never records the accept it sends — `set_reply_thread_digest` is called only when an accept is *received* — so `TspStore::recognizes_digest` on the accepting side holds the invite digest alone, although its own documentation says "a cancellation may name either, so both must be recognizable". The bundled endpoint APIs all happen to name the invite digest, so endpoint-to-endpoint flows hide it; the Go implementation names the Reply_Digest and hit it first, which is what prompted the `cancel-by-*-naming-*-digest` cases that now show it with any peer.
-
-Observed in 6 case(s); for example `relationship/cancel-by-inviter-naming-accept-digest` (affinidi-rust → affinidi-rust):
-
-```text
-affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-d6cc5408.conformance.example names an unrecognised relationship
-```
-
-<details><summary>Affected cases</summary>
-
-- `relationship/cancel-by-inviter-naming-accept-digest` affinidi-rust → affinidi-rust
-- `relationship/cancel-by-inviter-naming-accept-digest` reference-rust → affinidi-rust
-- `relationship/cancel-by-inviter-naming-accept-digest` tsp-js → affinidi-rust
-- `relationship/cancel-returns-to-none` go → affinidi-rust
-- `relationship/cancel-by-inviter-naming-accept-digest` go → affinidi-rust
-- `relationship/cancel-by-inviter-naming-accept-digest` dart → affinidi-rust
-
-</details>
-
-### 5. Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none
+### 4. Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none
 
 **Kind:** `limit` · **Spec:** §5.3: "the number of intermediaries in the route path may not be limited to 2"; no maximum is set
 
@@ -344,28 +317,6 @@ affinidi-rust refused to pack: [malformed] invalid message: route has 17 hops, e
 - `interop/hop/routed-17-hops` dart → affinidi-rust
 - `interop/hop/routed-12-hops` dart → tsp-js
 - `interop/hop/routed-17-hops` dart → tsp-js
-
-</details>
-
-### 6. tsp-js's relationship rules accept an RFA that names an invite never sent
-
-**Kind:** `api-gap` · **Spec:** §7.2.2: the RFA's Digest is the digest of the corresponding TSP_RFI
-
-The inviter (tsp-js) is sent an RFA packed by the other implementation's library with a random Digest. affinidi-tsp (`TspAgent::handle_control`: "accept … answers an invite we did not send") and tsp_sdk (`SecureStore::upgrade_relation`: "thread_id does not match digest") refuse it and stay in invite-sent. tsp-js ships its relationship rules as pure functions (`relationship.ts`) and leaves storage to the wallet; `transition("pending", "receiveAccept")` returns `bidirectional` without seeing a digest, and unlike the invite race (`resolveInviteRace`) and cancellation (`resolveCancel`) there is no helper for accept correlation. The driver applies only library rules, so the gap is visible here; every integrator of tsp-js must add the check themselves.
-
-Observed in 5 case(s); for example `relationship/accept-unknown-digest-refused` (tsp-js → affinidi-rust):
-
-```text
-tsp-js accepted an accept naming an invite it never sent (§7.2.2): event "accept"
-```
-
-<details><summary>Affected cases</summary>
-
-- `relationship/accept-unknown-digest-refused` tsp-js → affinidi-rust
-- `relationship/accept-unknown-digest-refused` tsp-js → reference-rust
-- `relationship/accept-unknown-digest-refused` tsp-js → tsp-js
-- `relationship/accept-unknown-digest-refused` tsp-js → go
-- `relationship/accept-unknown-digest-refused` tsp-js → dart
 
 </details>
 
