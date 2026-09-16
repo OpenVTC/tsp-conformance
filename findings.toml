@@ -96,6 +96,7 @@ implementation names the Reply_Digest and hit it first, which is what prompted t
 
 [[finding]]
 id = "hop-list-limits"
+fixed = "affinidi-tdk-rs#806, vta-browser-plugin#251 (MAX_HOPS 64)"
 kind = "limit"
 title = "Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none"
 match = ["too many hops", "route has \\d+ hops, exceeds", "hop list too long"]
