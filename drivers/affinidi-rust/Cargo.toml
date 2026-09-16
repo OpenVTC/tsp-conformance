@@ -12,6 +12,16 @@ description = "TSP conformance driver for affinidi-tsp"
 name = "tsp-driver-affinidi"
 path = "src/main.rs"
 
+[features]
+# Byte-exact packing from caller-fixed ephemeral material (the protocol's
+# `deterministic` capability), through affinidi-tsp's `test-vectors` feature.
+# Copies of the crate that predate that feature must still build, and cargo
+# refuses a feature forwarding to one the dependency does not declare even
+# when it is off, so the forwarding is not written here: build.sh adds
+# `test-vectors` to the dependency and enables this feature together, only when
+# the crate's manifest declares it. Build through build.sh.
+deterministic = []
+
 [dependencies]
 affinidi-tsp = { path = "../../../affinidi-tdk-rs/crates/messaging/affinidi-tsp", default-features = false, features = ["pq"] }
 serde_json = "1"

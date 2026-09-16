@@ -40,6 +40,15 @@ const CAPABILITIES: &[&str] = &[
     "endpoint",
 ];
 
+/// Advertised only when the crate's `test-vectors` feature is built in.
+fn capabilities() -> Vec<&'static str> {
+    let mut caps = CAPABILITIES.to_vec();
+    if cfg!(feature = "deterministic") {
+        caps.push("deterministic");
+    }
+    caps
+}
+
 fn map_err(e: TspError) -> DErr {
     let message = e.to_string();
     let code = match &e {
@@ -97,13 +106,29 @@ struct PackInput {
     referral_key: Option<[u8; 32]>,
     padding: Vec<u8>,
     returns_digest: bool,
+    /// `payloadSender: null` was requested (deterministic packing only).
+    #[cfg_attr(not(feature = "deterministic"), allow(dead_code))]
+    null_sender: bool,
+    /// A caller `pad` nonce (deterministic packing only).
+    #[cfg_attr(not(feature = "deterministic"), allow(dead_code))]
+    pad_nonce: Option<[u8; 16]>,
 }
 
-fn build_pack_input(scheme: &Scheme, sender: &Identity, payload: &Value) -> DResult<PackInput> {
-    // affinidi-tsp always writes the ESSR sender field (direct.rs
-    // `encode_sender_field`); it has no option to write NULL.
+/// `deterministic` is whether the request goes through the crate's
+/// `insecure_deterministic` packer, which can write a NULL ESSR sender and take
+/// a `pad` nonce; the public packing functions can do neither.
+fn build_pack_input(
+    scheme: &Scheme,
+    sender: &Identity,
+    payload: &Value,
+    deterministic: bool,
+) -> DResult<PackInput> {
+    // The public packing functions always write the ESSR sender field (direct.rs
+    // `encode_sender_field`); only the deterministic packer can write NULL.
+    let mut null_sender = false;
     if let Some(ps) = payload.get("payloadSender") {
         match ps {
+            Value::Null if deterministic => null_sender = true,
             Value::Null => {
                 return Err(unsupported(
                     "affinidi-tsp always carries the sender VID in the payload; NULL cannot be requested",
@@ -124,6 +149,8 @@ fn build_pack_input(scheme: &Scheme, sender: &Identity, payload: &Value) -> DRes
         referral_key: None,
         padding,
         returns_digest: false,
+        null_sender,
+        pad_nonce: None,
     };
     match ty {
         "scs" => input.body = bytes_field(payload, "data")?,
@@ -132,10 +159,13 @@ fn build_pack_input(scheme: &Scheme, sender: &Identity, payload: &Value) -> DRes
             input.kind = MessageType::GenericControl;
         }
         "pad" => {
-            if opt_bytes(payload, "nonce")?.is_some() {
-                return Err(unsupported(
-                    "pack_padding_message generates its own nonce; a caller nonce cannot be supplied",
-                ));
+            if let Some(n) = opt_bytes(payload, "nonce")? {
+                if !deterministic {
+                    return Err(unsupported(
+                        "pack_padding_message generates its own nonce; a caller nonce cannot be supplied",
+                    ));
+                }
+                input.pad_nonce = Some(fixed(&n, "nonce")?);
             }
             input.kind = MessageType::PaddingOnly;
         }
@@ -208,18 +238,30 @@ fn build_pack_input(scheme: &Scheme, sender: &Identity, payload: &Value) -> DRes
 }
 
 fn op_pack(req: &Value) -> DResult<Value> {
-    if !matches!(req.get("ephemeral"), None | Some(Value::Null)) {
-        return Err(unsupported(
-            "affinidi-tsp's message pack API has no ephemeral-key injection",
-        ));
-    }
+    let ephemeral = !matches!(req.get("ephemeral"), None | Some(Value::Null));
     let scheme = Scheme::parse(str_field(req, "scheme")?)?;
     let sender = Identity::field(req, "sender")?;
     let receiver = Identity::field(req, "receiver")?;
     let payload = req
         .get("payload")
         .ok_or_else(|| err("invalid-input", "missing payload"))?;
-    let input = build_pack_input(&scheme, &sender, payload)?;
+
+    // A signed-only message has no randomness, so the deterministic packer is
+    // also the one that can honour its NULL payload sender without `ephemeral`.
+    let signed_only_null_sender = matches!(scheme, Scheme::SignedOnly)
+        && matches!(payload.get("payloadSender"), Some(Value::Null));
+    if ephemeral || signed_only_null_sender {
+        #[cfg(feature = "deterministic")]
+        return deterministic::op_pack(req, &scheme, &sender, &receiver, payload);
+        #[cfg(not(feature = "deterministic"))]
+        if ephemeral {
+            return Err(unsupported(
+                "this build of affinidi-tsp has no ephemeral-key injection (feature test-vectors)",
+            ));
+        }
+    }
+
+    let input = build_pack_input(&scheme, &sender, payload, false)?;
     let s = sender.id.as_str();
     let r = receiver.id.as_str();
 
@@ -321,6 +363,99 @@ fn op_pack(req: &Value) -> DResult<Value> {
     Ok(json!({"message": b64e(&packed.bytes), "digest": digest, "digestAlg": alg}))
 }
 
+// ---------------------------------------------------------------- deterministic pack
+
+/// `pack` with the protocol's `ephemeral` field, through the crate's
+/// `insecure_deterministic` packer (feature `test-vectors`). It exists to
+/// reproduce the specification's vectors; the ephemeral material it takes is
+/// public, so nothing packed here is confidential.
+#[cfg(feature = "deterministic")]
+mod deterministic {
+    use super::*;
+    use affinidi_tsp::message::direct::insecure_deterministic::{
+        Options, PayloadSender, Protection, pack_insecure_deterministic,
+    };
+
+    pub fn op_pack(
+        req: &Value,
+        scheme: &Scheme,
+        sender: &Identity,
+        receiver: &Identity,
+        payload: &Value,
+    ) -> DResult<Value> {
+        let ephemeral = req.get("ephemeral").filter(|v| !v.is_null());
+        let key = |name: &str| -> DResult<Option<[u8; 32]>> {
+            match ephemeral {
+                None => Ok(None),
+                Some(e) => opt_bytes(e, name)?
+                    .map(|b| fixed(&b, &format!("ephemeral {name}")))
+                    .transpose(),
+            }
+        };
+        let (ikm_e, sk_em) = (key("ikmE")?, key("skEm")?);
+        let protection = match (scheme, ikm_e, sk_em) {
+            (Scheme::HpkeBase, Some(ikm_e), None) => Protection::HpkeBase { ikm_e },
+            (Scheme::SealedBox, None, Some(ephemeral_secret)) => {
+                Protection::SealedBox { ephemeral_secret }
+            }
+            (Scheme::SignedOnly, None, None) => Protection::SignedOnly,
+            (Scheme::HpkePq, ..) => {
+                return Err(unsupported("no deterministic packing for hpke-pq"));
+            }
+            _ => {
+                return Err(err(
+                    "invalid-input",
+                    "ephemeral must be ikmE for hpke-base, skEm for sealed-box, null for signed-only",
+                ));
+            }
+        };
+        if sender.is_pq() || receiver.is_pq() {
+            return Err(unsupported("deterministic packing with post-quantum key types"));
+        }
+
+        let input = build_pack_input(scheme, sender, payload, true)?;
+        let sks: [u8; 32] = fixed(sender.sk_s()?, "sender skS")?;
+        let pke: [u8; 32] = match scheme {
+            Scheme::SignedOnly => [0u8; 32],
+            _ => fixed(&receiver.pk_e, "receiver pkE")?,
+        };
+        let padding = if input.padding.is_empty() {
+            Padding::None
+        } else {
+            Padding::Exact(input.padding.clone())
+        };
+        let packed = pack_insecure_deterministic(
+            &input.body,
+            input.kind,
+            &sender.id,
+            &receiver.id,
+            &sks,
+            &pke,
+            protection,
+            &Options {
+                payload_sender: if input.null_sender {
+                    PayloadSender::Null
+                } else {
+                    PayloadSender::Present
+                },
+                padding,
+                hops: &input.hops,
+                pad_nonce: input.pad_nonce,
+                referral_signing_key: input.referral_key.as_ref(),
+            },
+        )
+        .map_err(map_err)?;
+
+        let (digest, alg) = if input.returns_digest {
+            (json!(b64e(&packed.thread_digest)), json!(scheme.digest_alg()))
+        } else {
+            (Value::Null, Value::Null)
+        };
+        Ok(json!({"message": b64e(&packed.bytes), "digest": digest, "digestAlg": alg}))
+    }
+}
+
+// ---------------------------------------------------------------- open
 // ---------------------------------------------------------------- open
 
 /// Which scheme sealed a message, read with the crate's own wire decoders.
@@ -590,7 +725,7 @@ fn main() {
             "version": "0.2.0",
             "language": "rust",
             "protocol": 1,
-            "capabilities": CAPABILITIES,
+            "capabilities": capabilities(),
         })),
         "pack" => op_pack(req),
         "open" => op_open(req),
