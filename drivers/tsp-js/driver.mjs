@@ -10,6 +10,12 @@
 // wallet. The driver therefore holds a Map as that storage and applies only
 // those library functions to it; it adds no rule of its own. Builds without
 // `resolveAccept` get no accept-to-invite correlation.
+//
+// Deterministic pack: tsp-js's test-only `unsafe-testing` subpath derives the
+// HPKE-Base ephemeral from a caller `ikmE` and can write the NULL VID in the
+// ESSR sender field, which is what reproducing Appendix A needs. It is loaded
+// only if the build has it, so the driver still runs against older builds and
+// simply does not advertise `deterministic`.
 
 import { createInterface } from "node:readline";
 import { dirname, resolve } from "node:path";
@@ -20,6 +26,10 @@ const TSP_JS = process.env.TSP_JS_DIR ?? resolve(here, "../../../pnm-browser-plu
 const tsp = await import(pathToFileURL(resolve(TSP_JS, "dist/index.js")).href);
 const { readFileSync } = await import("node:fs");
 const pkg = JSON.parse(readFileSync(resolve(TSP_JS, "package.json"), "utf8"));
+const unsafeTesting = await import(pathToFileURL(resolve(TSP_JS, "dist/unsafe-testing.js")).href).catch(
+  () => null,
+);
+const DETERMINISTIC = typeof unsafeTesting?.__unsafeDeterministicPack === "function";
 
 const CAPABILITIES = [
   "hpke-base",
@@ -36,6 +46,8 @@ const CAPABILITIES = [
   "payload.hop",
   "peek",
   "endpoint",
+  // `pack` honours `ephemeral.ikmE` (HPKE-Base) and caller nonces
+  ...(DETERMINISTIC ? ["deterministic"] : []),
 ];
 
 class DriverError extends Error {
@@ -83,45 +95,84 @@ function identity(v, what) {
 
 // ------------------------------------------------------------------ pack
 
+/**
+ * The packers for one request: the library's own, or — when the request pins
+ * the ephemeral — the `unsafe-testing` ones with that material bound in. Same
+ * call shapes either way, so the switch below does not branch on it.
+ */
+function packersFor(req, p, sender) {
+  const nullSender = "payloadSender" in p && p.payloadSender === null;
+  if ("payloadSender" in p && p.payloadSender !== null && p.payloadSender !== sender.id) {
+    throw unsupported("tsp-js writes the envelope sender's VID (or NULL) in the ESSR field");
+  }
+  if (req.ephemeral == null) {
+    if (nullSender) {
+      throw unsupported("tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral");
+    }
+    return {
+      pack: tsp.pack,
+      packInvite: tsp.packInvite,
+      packAccept: tsp.packAccept,
+      packCancel: tsp.packCancel,
+      packNested: tsp.packNested,
+      packRouted: tsp.packRouted,
+    };
+  }
+  if (!DETERMINISTIC) throw unsupported("this tsp-js build has no deterministic (unsafe-testing) packer");
+  if (req.ephemeral.ikmE == null) {
+    throw unsupported("tsp-js pins an HPKE-Base ikmE only (no sealed box, so no skEm)");
+  }
+  const u = unsafeTesting;
+  const det = { __unsafeIkmE: b64d(req.ephemeral.ikmE), nullPayloadSender: nullSender };
+  return {
+    pack: (body, s, r, k) => u.__unsafeDeterministicPack(body, s, r, k, det),
+    packInvite: (s, r, k, opts) => {
+      if (!opts.nonce) throw new DriverError("invalid-input", "a deterministic rfi needs a caller nonce");
+      return u.__unsafeDeterministicPackInvite(s, r, k, opts, det);
+    },
+    packAccept: (d, s, r, k) => u.__unsafeDeterministicPackAccept(d, s, r, k, det),
+    packCancel: (d, s, r, k) => u.__unsafeDeterministicPackCancel(d, s, r, k, det),
+    packNested: (inner, s, r, k) => u.__unsafeDeterministicPackNested(inner, s, r, k, det),
+    packRouted: (inner, hops, s, r, k) => u.__unsafeDeterministicPackRouted(inner, hops, s, r, k, det),
+  };
+}
+
 async function opPack(req) {
-  if (req.ephemeral != null) throw unsupported("tsp-js pack has no ephemeral-key injection");
   if (req.scheme !== "hpke-base") throw unsupported(`scheme ${req.scheme}: tsp-js packs HPKE-Base only`);
   const sender = identity(req.sender, "sender");
   const receiver = identity(req.receiver, "receiver");
   const p = req.payload ?? {};
-  if ("payloadSender" in p && p.payloadSender !== sender.id) {
-    throw unsupported("tsp-js always writes the sender VID in the ESSR field");
-  }
   if (p.padding && p.padding.length > 0) throw unsupported("tsp-js always writes an empty padding field");
+  const packers = packersFor(req, p, sender);
   const keys = { senderSigningKey: sender.skS, receiverEncryptionKey: receiver.pkE };
   let packed;
   let returnsDigest = false;
   switch (p.type) {
     case "scs":
-      packed = await tsp.pack(b64d(p.data), sender.id, receiver.id, keys);
+      packed = await packers.pack(b64d(p.data), sender.id, receiver.id, keys);
       break;
     case "rfi": {
       if (p.referral != null) throw unsupported("tsp-js cannot pack a referral (decode-only)");
       const opts = { route: p.replyPath ?? [] };
       if (p.nonce) opts.nonce = b64d(p.nonce);
-      packed = await tsp.packInvite(sender.id, receiver.id, keys, opts);
+      packed = await packers.packInvite(sender.id, receiver.id, keys, opts);
       returnsDigest = true;
       break;
     }
     case "rfa":
-      packed = await tsp.packAccept(b64d(p.digest), sender.id, receiver.id, keys);
+      packed = await packers.packAccept(b64d(p.digest), sender.id, receiver.id, keys);
       returnsDigest = true;
       break;
     case "rfd":
       if (p.digestAlg && p.digestAlg !== "sha2-256") throw unsupported("tsp-js digests are SHA2-256 only");
-      packed = await tsp.packCancel(b64d(p.digest), sender.id, receiver.id, keys);
+      packed = await packers.packCancel(b64d(p.digest), sender.id, receiver.id, keys);
       break;
     case "hop": {
       const hops = p.hops ?? [];
       const inner = b64d(p.inner);
       packed = hops.length === 0
-        ? await tsp.packNested(inner, sender.id, receiver.id, keys)
-        : await tsp.packRouted(inner, hops, sender.id, receiver.id, keys);
+        ? await packers.packNested(inner, sender.id, receiver.id, keys)
+        : await packers.packRouted(inner, hops, sender.id, receiver.id, keys);
       break;
     }
     default:
