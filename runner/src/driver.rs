@@ -20,6 +20,12 @@ pub struct DriverConfig {
     pub run: String,
     #[serde(default = "yes")]
     pub enabled: bool,
+    /// Extra environment for the build and run commands.
+    #[serde(default)]
+    pub env: std::collections::BTreeMap<String, String>,
+    /// Set when a local override file changed this entry (for the report).
+    #[serde(skip)]
+    pub overridden: Vec<String>,
 }
 
 fn yes() -> bool {
@@ -32,9 +38,55 @@ pub struct Config {
     pub drivers: Vec<DriverConfig>,
 }
 
+/// A partial driver entry from a local, uncommitted override file.
+#[derive(Debug, Deserialize)]
+struct DriverOverride {
+    name: String,
+    description: Option<String>,
+    cwd: Option<String>,
+    build: Option<String>,
+    run: Option<String>,
+    enabled: Option<bool>,
+    #[serde(default)]
+    env: std::collections::BTreeMap<String, String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct OverrideFile {
+    #[serde(rename = "driver", default)]
+    drivers: Vec<DriverOverride>,
+}
+
+/// Load `path`, then apply `<stem>.local.toml` beside it if present: entries
+/// are matched by `name`, given fields replace the committed ones, and `env`
+/// entries are added. The local file is for pointing a driver at a worktree or
+/// branch without editing the committed configuration.
 pub fn load_config(path: &Path) -> Result<Config, String> {
     let text = std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
-    toml::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
+    let mut cfg: Config = toml::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))?;
+    let local = path.with_extension("local.toml");
+    if local.exists() {
+        let text = std::fs::read_to_string(&local).map_err(|e| format!("{}: {e}", local.display()))?;
+        let ov: OverrideFile = toml::from_str(&text).map_err(|e| format!("{}: {e}", local.display()))?;
+        for o in ov.drivers {
+            let Some(d) = cfg.drivers.iter_mut().find(|d| d.name == o.name) else {
+                return Err(format!("{}: no driver named {}", local.display(), o.name));
+            };
+            let mut changed = vec![];
+            if let Some(v) = o.description { d.description = v; }
+            if let Some(v) = o.cwd { d.cwd = v; changed.push("cwd".to_string()); }
+            if let Some(v) = o.build { d.build = Some(v); changed.push("build".into()); }
+            if let Some(v) = o.run { d.run = v; changed.push("run".into()); }
+            if let Some(v) = o.enabled { d.enabled = v; }
+            for (k, v) in o.env {
+                changed.push(format!("{k}={v}"));
+                d.env.insert(k, v);
+            }
+            d.overridden = changed;
+        }
+        eprintln!("applied local overrides from {}", local.display());
+    }
+    Ok(cfg)
 }
 
 #[derive(Debug, Clone)]
@@ -115,6 +167,7 @@ impl Driver {
         let mut child = Command::new("sh")
             .arg("-c")
             .arg(format!("exec {}", self.cfg.run))
+            .envs(&self.cfg.env)
             .current_dir(&cwd)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())

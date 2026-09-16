@@ -63,6 +63,9 @@ struct Args {
     /// Build (implies --build) and start each selected driver, report, and exit.
     #[arg(long)]
     build_only: bool,
+    /// A note printed under the report title (e.g. which branches were built).
+    #[arg(long, default_value = "")]
+    note: String,
     /// Known root causes used to group failures in the report.
     #[arg(long, default_value = "findings.toml")]
     findings: PathBuf,
@@ -96,6 +99,7 @@ fn build(cfg: &driver::DriverConfig, cwd: &Path, logs: &Path) -> Result<(), Stri
     let out = Command::new("sh")
         .arg("-c")
         .arg(cmd)
+        .envs(&cfg.env)
         .current_dir(cwd)
         .output()
         .map_err(|e| format!("cannot run build: {e}"))?;
@@ -164,6 +168,7 @@ fn main() {
         let skip = |reason: String, dc: &driver::DriverConfig| DriverEntry {
             name: dc.name.clone(),
             description: dc.description.clone(),
+            overrides: dc.overridden.clone(),
             status: "skipped".into(),
             reason,
             hello: serde_json::Value::Null,
@@ -268,6 +273,7 @@ fn main() {
         .map(|d| DriverEntry {
             name: d.name().into(),
             description: d.cfg.description.clone(),
+            overrides: d.cfg.overridden.clone(),
             status: "ran".into(),
             reason: String::new(),
             hello: d.hello.clone(),
@@ -279,6 +285,7 @@ fn main() {
     let rep = Report {
         tool: format!("tsp-conformance {}", env!("CARGO_PKG_VERSION")),
         generated_at: now_rfc3339(),
+        note: args.note.clone(),
         seed,
         spec: ctx.fixture["_source"].clone(),
         suites: suites.clone(),
@@ -341,6 +348,7 @@ fn report_from_value(v: serde_json::Value) -> Report {
         .map(|d| DriverEntry {
             name: d["name"].as_str().unwrap_or_default().into(),
             description: d["description"].as_str().unwrap_or_default().into(),
+            overrides: strs(&d["overrides"]),
             status: d["status"].as_str().unwrap_or_default().into(),
             reason: d["reason"].as_str().unwrap_or_default().into(),
             hello: d["hello"].clone(),
@@ -351,6 +359,7 @@ fn report_from_value(v: serde_json::Value) -> Report {
     Report {
         tool: v["tool"].as_str().unwrap_or_default().into(),
         generated_at: v["generatedAt"].as_str().unwrap_or_default().into(),
+        note: v["note"].as_str().unwrap_or_default().into(),
         seed: v["seed"].as_u64().unwrap_or(0),
         spec: v["spec"].clone(),
         suites: strs(&v["suites"]),

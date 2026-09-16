@@ -220,11 +220,52 @@ fn cancel_naming(ctx: &mut Ctx, a: usize, b: usize, from_inviter: bool, name_acc
     Ok(finish(diffs, &cause))
 }
 
-fn case_race(ctx: &mut Ctx, a: usize, b: usize) -> R<Outcome> {
+/// Both endpoints invite; returns the pair and the two invite results.
+fn crossing_invites(ctx: &mut Ctx, a: usize, b: usize) -> R<(Pair, Value, Value)> {
     let p = setup(ctx, a, b)?;
-    let mut diffs = vec![];
     let ia = ep(ctx, a, "endpoint.invite", json!({"endpoint": p.ea, "from": p.va.id, "to": p.vb.id}))?;
     let ib = ep(ctx, b, "endpoint.invite", json!({"endpoint": p.eb, "from": p.vb.id, "to": p.va.id}))?;
+    Ok((p, ia, ib))
+}
+
+fn case_race(ctx: &mut Ctx, a: usize, b: usize) -> R<Outcome> {
+    let (p, ia, ib) = crossing_invites(ctx, a, b)?;
+    resolve_race(ctx, a, b, p, ia, ib)
+}
+
+/// The qb64 text of a SHA2-256 digest primitive (`I` + 43 characters).
+fn digest_text(raw_b64: &str) -> String {
+    let mut raw = vec![0u8];
+    raw.extend(crate::model::unb64(raw_b64));
+    format!("I{}", &crate::cesr::to_text(&raw)[1..])
+}
+
+/// tswg-tsp-specification#76: the race compares RAW digest bytes. Find a pair
+/// of crossing invites whose raw order disagrees with their qb64-text (ASCII)
+/// order, so an implementation comparing the encoded text picks the other one.
+fn case_race_raw_order(ctx: &mut Ctx, a: usize, b: usize) -> R<Outcome> {
+    const ATTEMPTS: usize = 2000;
+    for attempt in 1..=ATTEMPTS {
+        let (p, ia, ib) = crossing_invites(ctx, a, b)?;
+        let (da, db) = (ia["digest"].as_str().unwrap_or_default(), ib["digest"].as_str().unwrap_or_default());
+        let raw_a_lower = crate::model::unb64(da) < crate::model::unb64(db);
+        let text_a_lower = digest_text(da) < digest_text(db);
+        if raw_a_lower != text_a_lower {
+            let mut o = resolve_race(ctx, a, b, p, ia, ib)?;
+            let note = format!("found after {attempt} invite pair(s): raw order and qb64 text order disagree");
+            if o.detail.is_empty() {
+                o.detail = note;
+            } else {
+                o.detail = format!("{note}\n{}", o.detail);
+            }
+            return Ok(o);
+        }
+    }
+    Ok(Outcome::skip(format!("no invite pair with disagreeing raw/text order in {ATTEMPTS} attempts")))
+}
+
+fn resolve_race(ctx: &mut Ctx, a: usize, b: usize, p: Pair, ia: Value, ib: Value) -> R<Outcome> {
+    let mut diffs = vec![];
     let (da, db) = (
         ia["digest"].as_str().unwrap_or_default().to_string(),
         ib["digest"].as_str().unwrap_or_default().to_string(),
@@ -288,7 +329,7 @@ fn case_unknown_accept(ctx: &mut Ctx, a: usize, b: usize) -> R<Outcome> {
 pub fn run(ctx: &mut Ctx, a: usize, b: usize) {
     let (an, bn) = (ctx.name(a), ctx.name(b));
     type F = fn(&mut Ctx, usize, usize) -> R<Outcome>;
-    let cases: [(&str, &str, F); 9] = [
+    let cases: [(&str, &str, F); 10] = [
         ("invite-accept-bidirectional", "§7.2.1, §7.2.2", case_invite_accept),
         ("message-before-relationship-refused", "§7.2.2", case_message_first),
         ("cancel-returns-to-none", "§7.3", case_cancel),
@@ -296,7 +337,8 @@ pub fn run(ctx: &mut Ctx, a: usize, b: usize) {
         ("cancel-by-inviter-naming-accept-digest", "§7.2.2 (Reply_Digest recorded by both), §7.3", |c, a, b| cancel_naming(c, a, b, true, true)),
         ("cancel-by-accepter-naming-invite-digest", "§7.2.2, §7.3", |c, a, b| cancel_naming(c, a, b, false, false)),
         ("cancel-by-accepter-naming-accept-digest", "§7.2.2 (Reply_Digest recorded by both), §7.3", |c, a, b| cancel_naming(c, a, b, false, true)),
-        ("rfi-race-lower-digest-wins", "§7.2.3", case_race),
+        ("rfi-race-lower-digest-wins", "§7.2.3; tswg-tsp-specification#76 (raw bytes)", case_race),
+        ("invite-race-raw-byte-order", "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)", case_race_raw_order),
         ("accept-unknown-digest-refused", "§7.2.2", case_unknown_accept),
     ];
     for (name, spec, f) in cases {

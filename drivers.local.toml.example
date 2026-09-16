@@ -1,0 +1,11 @@
+# Copy to drivers.local.toml (git-ignored) to point drivers at other checkouts
+# for a run. Entries match drivers.toml by name; given fields replace the
+# committed ones and `env` is added to the build and run environment.
+
+[[driver]]
+name = "affinidi-rust"
+env = { AFFINIDI_TSP_PATH = "/path/to/affinidi-tdk-rs-worktree/crates/messaging/affinidi-tsp" }
+
+[[driver]]
+name = "tsp-js"
+env = { TSP_JS_DIR = "/path/to/pnm-browser-plugin-worktree/packages/tsp-js" }

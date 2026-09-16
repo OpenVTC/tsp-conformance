@@ -118,7 +118,12 @@ runner implements no HPKE):
 | `resigned/direct-signed-only/non-canonical-lead-byte` | the `5BAH` data field's lead byte made non-zero | malformed | §3.7 (MUST reject) |
 | `resigned/direct-signed-only/essr-sender-mismatch` | ESSR field set to bob while the envelope says alice | sender | §3.7 step 7, §8.2.2 |
 | `resigned/direct-signed-only/payload-count-too-large` | `-Z` count +1 | malformed | §9.2 |
-| `resigned/direct-signed-only/data-after-payload-fields` | an extra field after the `-A` stream, counts adjusted | malformed | §9.2.3 |
+| `resigned/direct-signed-only/xscs-body-h-group-json` | the `-A##` stream holds an `-H##` group with a JSON Bytes primitive | malformed | tswg-tsp-specification#77; §9.2.3 |
+| `resigned/direct-signed-only/xscs-body-two-bytes-primitives` | the `-A##` stream holds two Bytes primitives | malformed | tswg-tsp-specification#77 |
+| `resigned/direct-signed-only/xscs-body-data-after-stream` | one primitive, then another field after the `-A##` stream inside the `-Z` frame (counts adjusted) | malformed | tswg-tsp-specification#77 |
+
+The #77 cases need a signed-only reader; tsp-js has none, so they skip there
+(its unit test `tests/payload.app-stream.mjs` covers the same three bodies).
 
 ## 4. `relationship` — every ordered pair of endpoints (A, B)
 
@@ -130,5 +135,6 @@ Needs `endpoint` on both. The runner carries messages between the drivers.
 | `message-before-relationship-refused` | A's library packs an application message with no relationship; B refuses it and stays `none` | §7.2.2 |
 | `cancel-returns-to-none` | after forming, A cancels; B sees `cancel` naming one of the two digests; both `none` | §7.3 |
 | `cancel-by-{inviter,accepter}-naming-{invite,accept}-digest` | after forming, one side's *library* packs an RFD naming a chosen digest (the endpoint API always picks its own); the other endpoint must report `cancel` and reach `none`. Covers all four combinations, since §7.2.2 has both endpoints record both digests | §7.2.2, §7.3 |
-| `rfi-race-lower-digest-wins` | both invite at once and each receives the other's; the side with the lexicographically lower digest stays invite-sent, the other becomes invite-received on that digest; the accept then completes with the lower digest on both sides | §7.2.3 |
+| `invite-race-raw-byte-order` | as the race above, but new endpoint pairs are created (up to 2000) until the two RFI digests' raw-byte order disagrees with the order of their qb64 text compared as ASCII (about 2% of pairs); both sides must keep the RAW-lower invite and then complete the accept | tswg-tsp-specification#76; §7.2.3 |
+| `rfi-race-lower-digest-wins` | both invite at once and each receives the other's; the side whose digest is lower as raw bytes (tswg-tsp-specification#76) stays invite-sent, the other becomes invite-received on that digest; the accept then completes with the lower digest on both sides | §7.2.3 |
 | `accept-unknown-digest-refused` | A invites; B's library packs an rfa echoing a random digest; A refuses it and stays invite-sent | §7.2.2 |

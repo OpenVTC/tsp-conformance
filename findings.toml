@@ -61,20 +61,13 @@ check exists only in `tsp_hpke::open` and `tsp_nacl::open`. The spec states the 
 variants, so this is a gap to close in the spec as much as a behaviour to align."""
 
 [[finding]]
-id = "affinidi-data-after-payload"
+id = "xscs-body-not-single-bytes"
 kind = "disagreement"
-title = "affinidi-tsp ignores data after the last field of an XSCS payload; tsp_sdk rejects it"
-implementation = "affinidi-rust"
-match = ["data-after-payload-fields"]
-spec = "§9.2.3: the XSCS layout ends with the -A## stream"
+title = "An XSCS body other than exactly one Bytes primitive is accepted (tswg-tsp-specification#77)"
+match = ["xscs-body-", "data-after-payload-fields"]
+spec = "tswg-tsp-specification#77 (proposed): the XSCS/XCTL body is -A## holding exactly one Bytes primitive and ending the payload frame; anything else MUST be rejected. §9.2.3 as merged says the body is an opaque CESR stream with -H## groups"
 explanation = """
-An extra empty Bytes field is appended inside the `-Z` frame after the `-A` stream (both counts adjusted) and the \
-`direct-signed-only` vector re-signed. tsp_sdk refuses (\"frame count does not match the framed content\": \
-`cesr/packet.rs` `decode_opaque_data` requires the `-A` stream to fill the rest of the payload exactly). \
-affinidi-tsp returns the payload: `message/direct.rs` `decode_payload_frame` checks that the body does not overrun \
-the `-A` stream but never that the stream ends the frame. The extra bytes are covered by the sender's signature, \
-so this is a canonicality/malleability point rather than a forgery. Static reading: tsp-js `rev3/payload.ts` \
-`decodePayloadFrame` has the same shape (no end-of-frame check), untestable here without a signed-only reader."""
+Three bodies are derived from the `direct-signed-only` vector and re-signed with alice's published key: an `-H##` group holding a Bytes primitive with JSON (the form §9.2.3 describes), two Bytes primitives, and one primitive followed by another field after the `-A` stream inside the `-Z` frame. tsp_sdk 0.11.0 has always refused all three (`cesr/packet.rs` `decode_opaque_data`). Before the #77 fixes, affinidi-tsp accepted the third (and returned only the first primitive of the second): `decode_payload_frame` checked only that the body did not overrun the stream. A failure here on a build that includes the #77 fix is a regression."""
 
 [[finding]]
 id = "affinidi-accepter-forgets-reply-digest"
@@ -127,3 +120,13 @@ ships its relationship rules as pure functions (`relationship.ts`) and leaves st
 invite race (`resolveInviteRace`) and cancellation (`resolveCancel`) there is no helper for accept correlation. \
 The driver applies only library rules, so the gap is visible here; every integrator of tsp-js must add the \
 check themselves."""
+
+[[finding]]
+id = "tsp-js-xscs-body-coverage"
+kind = "coverage-note"
+title = "tsp-js: the #77 XSCS-body cases cannot run end to end"
+implementation = "tsp-js"
+match = []
+spec = "tswg-tsp-specification#77"
+explanation = """
+The #77 cases are built by editing and re-signing a signed-only message, because the runner implements no HPKE, and tsp-js has no signed-only reader, so they skip for tsp-js. The rule is covered at unit level in the library: `packages/tsp-js/tests/payload.app-stream.mjs` feeds `decodePayloadFrame` a single Bytes primitive (accepted), an `-H##` group, a second primitive, and data after the stream (all refused). No confidential path exists either: no driver can pack those bodies, and the deterministic packers (go, dart) take ephemeral keys but only for bodies they build themselves."""

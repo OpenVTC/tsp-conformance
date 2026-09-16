@@ -77,6 +77,14 @@ runner/target/release/tsp-conformance \
 | `--from-json` | re-render Markdown from an existing JSON report |
 | `-v` | print every case, not only failures |
 
+To build against a worktree or branch without editing committed files, copy
+`drivers.local.toml.example` to `drivers.local.toml` (git-ignored). It overrides
+entries of `drivers.toml` by name and adds `env`: `AFFINIDI_TSP_PATH` makes
+`drivers/affinidi-rust/build.sh` build against another copy of the crate, and
+`TSP_JS_DIR` points the tsp-js build and driver at another package directory.
+Overrides in effect are listed in the report; `--note "…"` adds a line under
+its title.
+
 The exit status is non-zero when any case failed or errored. A driver whose
 directory is missing, whose build fails or that does not answer `hello` is
 skipped, and the report says why.

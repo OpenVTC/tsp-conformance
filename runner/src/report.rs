@@ -11,6 +11,9 @@ use std::fmt::Write;
 pub struct DriverEntry {
     pub name: String,
     pub description: String,
+    /// Fields changed by drivers.local.toml for this run.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub overrides: Vec<String>,
     /// `ran` or `skipped`.
     pub status: String,
     #[serde(skip_serializing_if = "String::is_empty")]
@@ -25,6 +28,8 @@ pub struct DriverEntry {
 pub struct Report {
     pub tool: String,
     pub generated_at: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub note: String,
     pub seed: u64,
     pub spec: Value,
     pub suites: Vec<String>,
@@ -159,6 +164,9 @@ pub fn markdown(rep: &Report) -> String {
         rep.generated_at,
         rep.seed
     );
+    if !rep.note.is_empty() {
+        let _ = writeln!(md, "> **Note:** {}\n", rep.note);
+    }
     let _ = writeln!(
         md,
         "Each case is **pass**, **fail** (with the diff), **skip** (a capability the implementation does not offer) or **error** (the harness or a driver broke). Cells read `✓ passed/ran` when nothing failed, `✗ passed/ran` when something did, `–` when every case skipped.\n"
@@ -183,6 +191,14 @@ pub fn markdown(rep: &Report) -> String {
             d.hello["language"].as_str().unwrap_or("—"),
             status
         );
+    }
+
+    let ov: Vec<&DriverEntry> = rep.drivers.iter().filter(|d| !d.overrides.is_empty()).collect();
+    if !ov.is_empty() {
+        let _ = writeln!(md, "\nLocal overrides in effect (`drivers.local.toml`, not committed):\n");
+        for d in ov {
+            let _ = writeln!(md, "- **{}**: {}", d.name, d.overrides.iter().map(|o| format!("`{o}`")).collect::<Vec<_>>().join(", "));
+        }
     }
 
     // ---- summary
@@ -348,6 +364,15 @@ pub fn markdown(rep: &Report) -> String {
         affected.dedup();
         if affected.len() > 1 {
             let _ = writeln!(md, "<details><summary>All affected cases</summary>\n\n{}\n\n</details>\n", affected.iter().map(|a| format!("- {a}")).collect::<Vec<_>>().join("\n"));
+        }
+    }
+
+    // ---- coverage notes
+    let notes: Vec<&Finding> = rep.findings.iter().filter(|f| f.kind == "coverage-note").collect();
+    if !notes.is_empty() {
+        let _ = writeln!(md, "## Coverage notes\n");
+        for f in notes {
+            let _ = writeln!(md, "**{}** ({})\n\n{}\n", esc(&f.title), f.spec, f.explanation.trim());
         }
     }
 

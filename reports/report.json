@@ -1,6 +1,7 @@
 {
   "tool": "tsp-conformance 0.1.0",
-  "generatedAt": "2026-09-16T11:16:23Z",
+  "generatedAt": "2026-09-16T11:31:43Z",
+  "note": "This run builds affinidi-tsp and tsp-js from the unpushed #77 fix branches (affinidi-tdk-rs-wt-tsp77 fix/tsp-app-payload-single-bytes, pnm-browser-plugin-wt-tsp77) via drivers.local.toml, and the Go and Dart libraries at 815e3fe / f24ecc2; tsp_sdk is 0.11.0 from crates.io. Committed drivers.toml still points at the normal checkouts.",
   "seed": 20260916,
   "spec": {
     "commit": "f5b8668",
@@ -18,6 +19,9 @@
     {
       "name": "affinidi-rust",
       "description": "affinidi-tsp (affinidi-tdk-rs), path dependency, feature pq",
+      "overrides": [
+        "AFFINIDI_TSP_PATH=/Users/glenngore/devel/affinidi-tdk-rs-wt-tsp77/crates/messaging/affinidi-tsp"
+      ],
       "status": "ran",
       "hello": {
         "capabilities": [
@@ -114,6 +118,9 @@
     {
       "name": "tsp-js",
       "description": "@openvtc/vti-tsp-js (pnm-browser-plugin/packages/tsp-js), built dist",
+      "overrides": [
+        "TSP_JS_DIR=/Users/glenngore/devel/pnm-browser-plugin-wt-tsp77/packages/tsp-js"
+      ],
       "status": "ran",
       "hello": {
         "capabilities": [
@@ -264,13 +271,13 @@
       "error": 0
     },
     "negative": {
-      "pass": 368,
-      "fail": 9,
-      "skip": 68,
+      "pass": 377,
+      "fail": 8,
+      "skip": 70,
       "error": 0
     },
     "relationship": {
-      "pass": 214,
+      "pass": 239,
       "fail": 11,
       "skip": 0,
       "error": 0
@@ -317,15 +324,15 @@
       "explanation": "The `direct-signed-only` vector's ESSR field (`4BAA`, NULL) is replaced with bob's VID and the message re-signed with alice's key, so the envelope says alice and the payload says bob. affinidi-tsp refuses (\"ESSR sender VID does not match the envelope sender\") because it checks the field for every layout. tsp_sdk 0.11.0 accepts: `crypto/nonconfidential.rs` `verify_payload` decodes `sender_identity` and `crypto::verify` discards it; the check exists only in `tsp_hpke::open` and `tsp_nacl::open`. The spec states the check only for the confidential variants, so this is a gap to close in the spec as much as a behaviour to align."
     },
     {
-      "id": "affinidi-data-after-payload",
+      "id": "xscs-body-not-single-bytes",
       "kind": "disagreement",
-      "title": "affinidi-tsp ignores data after the last field of an XSCS payload; tsp_sdk rejects it",
-      "implementation": "affinidi-rust",
+      "title": "An XSCS body other than exactly one Bytes primitive is accepted (tswg-tsp-specification#77)",
       "match": [
+        "xscs-body-",
         "data-after-payload-fields"
       ],
-      "spec": "§9.2.3: the XSCS layout ends with the -A## stream",
-      "explanation": "An extra empty Bytes field is appended inside the `-Z` frame after the `-A` stream (both counts adjusted) and the `direct-signed-only` vector re-signed. tsp_sdk refuses (\"frame count does not match the framed content\": `cesr/packet.rs` `decode_opaque_data` requires the `-A` stream to fill the rest of the payload exactly). affinidi-tsp returns the payload: `message/direct.rs` `decode_payload_frame` checks that the body does not overrun the `-A` stream but never that the stream ends the frame. The extra bytes are covered by the sender's signature, so this is a canonicality/malleability point rather than a forgery. Static reading: tsp-js `rev3/payload.ts` `decodePayloadFrame` has the same shape (no end-of-frame check), untestable here without a signed-only reader."
+      "spec": "tswg-tsp-specification#77 (proposed): the XSCS/XCTL body is -A## holding exactly one Bytes primitive and ending the payload frame; anything else MUST be rejected. §9.2.3 as merged says the body is an opaque CESR stream with -H## groups",
+      "explanation": "Three bodies are derived from the `direct-signed-only` vector and re-signed with alice's published key: an `-H##` group holding a Bytes primitive with JSON (the form §9.2.3 describes), two Bytes primitives, and one primitive followed by another field after the `-A` stream inside the `-Z` frame. tsp_sdk 0.11.0 has always refused all three (`cesr/packet.rs` `decode_opaque_data`). Before the #77 fixes, affinidi-tsp accepted the third (and returned only the first primitive of the second): `decode_payload_frame` checked only that the body did not overrun the stream. A failure here on a build that includes the #77 fix is a regression."
     },
     {
       "id": "affinidi-accepter-forgets-reply-digest",
@@ -362,6 +369,15 @@
       ],
       "spec": "§7.2.2: the RFA's Digest is the digest of the corresponding TSP_RFI",
       "explanation": "The inviter (tsp-js) is sent an RFA packed by the other implementation's library with a random Digest. affinidi-tsp (`TspAgent::handle_control`: \"accept … answers an invite we did not send\") and tsp_sdk (`SecureStore::upgrade_relation`: \"thread_id does not match digest\") refuse it and stay in invite-sent. tsp-js ships its relationship rules as pure functions (`relationship.ts`) and leaves storage to the wallet; `transition(\"pending\", \"receiveAccept\")` returns `bidirectional` without seeing a digest, and unlike the invite race (`resolveInviteRace`) and cancellation (`resolveCancel`) there is no helper for accept correlation. The driver applies only library rules, so the gap is visible here; every integrator of tsp-js must add the check themselves."
+    },
+    {
+      "id": "tsp-js-xscs-body-coverage",
+      "kind": "coverage-note",
+      "title": "tsp-js: the #77 XSCS-body cases cannot run end to end",
+      "implementation": "tsp-js",
+      "match": [],
+      "spec": "tswg-tsp-specification#77",
+      "explanation": "The #77 cases are built by editing and re-signing a signed-only message, because the runner implements no HPKE, and tsp-js has no signed-only reader, so they skip for tsp-js. The rule is covered at unit level in the library: `packages/tsp-js/tests/payload.app-stream.mjs` feeds `decodePayloadFrame` a single Bytes primitive (accepted), an `-H##` group, a second primitive, and data after the stream (all refused). No confidential path exists either: no driver can pack those bodies, and the deterministic packers (go, dart) take ephemeral keys but only for bodies they build themselves."
     }
   ],
   "results": [
@@ -14957,14 +14973,30 @@
     },
     {
       "suite": "negative",
-      "case": "resigned/direct-signed-only/data-after-payload-fields",
-      "spec": "§9.2.3 (the -A stream is the last field of XSCS)",
+      "case": "resigned/direct-signed-only/xscs-body-h-group-json",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (XSCS body = -A## holding exactly one Bytes primitive)",
       "sender": "vector (re-signed)",
       "receiver": "affinidi-rust",
-      "status": "fail",
-      "detail": "accepted a message with data-after-payload-fields (source direct-signed-only (re-signed)); decoded payload type \"scs\"",
-      "cause": "affinidi-rust accepts a message with data-after-payload-fields",
-      "finding": "affinidi-data-after-payload"
+      "status": "pass",
+      "detail": "refused: [malformed] invalid message: missing payload body"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-two-bytes-primitives",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "refused: [malformed] invalid message: -A stream must hold exactly one Bytes primitive"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-data-after-stream",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (the -A## stream ends the payload frame)",
+      "sender": "vector (re-signed)",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "refused: [malformed] invalid message: -A stream does not end the payload frame"
     },
     {
       "suite": "negative",
@@ -15776,8 +15808,26 @@
     },
     {
       "suite": "negative",
-      "case": "resigned/direct-signed-only/data-after-payload-fields",
-      "spec": "§9.2.3 (the -A stream is the last field of XSCS)",
+      "case": "resigned/direct-signed-only/xscs-body-h-group-json",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (XSCS body = -A## holding exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "refused: [malformed] failed to decode message unexpected data encountered while decoding"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-two-bytes-primitives",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "refused: [malformed] failed to decode message unexpected data encountered while decoding"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-data-after-stream",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (the -A## stream ends the payload frame)",
       "sender": "vector (re-signed)",
       "receiver": "reference-rust",
       "status": "pass",
@@ -16577,8 +16627,26 @@
     },
     {
       "suite": "negative",
-      "case": "resigned/direct-signed-only/data-after-payload-fields",
-      "spec": "§9.2.3 (the -A stream is the last field of XSCS)",
+      "case": "resigned/direct-signed-only/xscs-body-h-group-json",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (XSCS body = -A## holding exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "tsp-js",
+      "status": "skip",
+      "detail": "tsp-js lacks signed-only:open"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-two-bytes-primitives",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "tsp-js",
+      "status": "skip",
+      "detail": "tsp-js lacks signed-only:open"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-data-after-stream",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (the -A## stream ends the payload frame)",
       "sender": "vector (re-signed)",
       "receiver": "tsp-js",
       "status": "skip",
@@ -17396,8 +17464,26 @@
     },
     {
       "suite": "negative",
-      "case": "resigned/direct-signed-only/data-after-payload-fields",
-      "spec": "§9.2.3 (the -A stream is the last field of XSCS)",
+      "case": "resigned/direct-signed-only/xscs-body-h-group-json",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (XSCS body = -A## holding exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "refused: [malformed] tsp: malformed: payload data: cesr: unexpected code: not a variable data primitive"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-two-bytes-primitives",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "refused: [malformed] tsp: malformed: payload stream holds more than one Bytes primitive"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-data-after-stream",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (the -A## stream ends the payload frame)",
       "sender": "vector (re-signed)",
       "receiver": "go",
       "status": "pass",
@@ -18200,12 +18286,30 @@
     },
     {
       "suite": "negative",
-      "case": "resigned/direct-signed-only/data-after-payload-fields",
-      "spec": "§9.2.3 (the -A stream is the last field of XSCS)",
+      "case": "resigned/direct-signed-only/xscs-body-h-group-json",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (XSCS body = -A## holding exactly one Bytes primitive)",
       "sender": "vector (re-signed)",
       "receiver": "dart",
       "status": "pass",
-      "detail": "refused: [malformed] 3 unexpected trailing bytes in payload frame"
+      "detail": "refused: [malformed] expected payload body"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-two-bytes-primitives",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (exactly one Bytes primitive)",
+      "sender": "vector (re-signed)",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "refused: [malformed] 6 unexpected trailing bytes in generic CESR stream"
+    },
+    {
+      "suite": "negative",
+      "case": "resigned/direct-signed-only/xscs-body-data-after-stream",
+      "spec": "tswg-tsp-specification#77; §9.2.3 (the -A## stream ends the payload frame)",
+      "sender": "vector (re-signed)",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "refused: [malformed] 6 unexpected trailing bytes in payload frame"
     },
     {
       "suite": "relationship",
@@ -18275,11 +18379,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "affinidi-rust",
       "receiver": "affinidi-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "found after 13 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18288,7 +18401,7 @@
       "sender": "affinidi-rust",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-71bedbde.conformance.example answers an invite we did not send"
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-453a8692.conformance.example answers an invite we did not send"
     },
     {
       "suite": "relationship",
@@ -18306,7 +18419,7 @@
       "sender": "affinidi-rust",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-159c837c.conformance.example to did:web:endpoint-b-499a5431.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-c2692c14.conformance.example to did:web:endpoint-b-f2579d7c.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
@@ -18356,11 +18469,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "affinidi-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 57 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18369,7 +18491,7 @@
       "sender": "affinidi-rust",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-6eea571d.conformance.example answers an invite we did not send"
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-0808d0ef.conformance.example answers an invite we did not send"
     },
     {
       "suite": "relationship",
@@ -18437,11 +18559,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "affinidi-rust",
       "receiver": "tsp-js",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 71 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18450,7 +18581,7 @@
       "sender": "affinidi-rust",
       "receiver": "tsp-js",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-3867fefa.conformance.example answers an invite we did not send"
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-c4f56a01.conformance.example answers an invite we did not send"
     },
     {
       "suite": "relationship",
@@ -18468,7 +18599,7 @@
       "sender": "affinidi-rust",
       "receiver": "go",
       "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-1b6579ee.conformance.example\" without a relationship"
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-29b7bb71.conformance.example\" without a relationship"
     },
     {
       "suite": "relationship",
@@ -18518,11 +18649,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "affinidi-rust",
       "receiver": "go",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 5 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18531,7 +18671,7 @@
       "sender": "affinidi-rust",
       "receiver": "go",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-11cfdfd0.conformance.example answers an invite we did not send"
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-e514035d.conformance.example answers an invite we did not send"
     },
     {
       "suite": "relationship",
@@ -18549,7 +18689,7 @@
       "sender": "affinidi-rust",
       "receiver": "dart",
       "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-139334be.conformance.example (state none)"
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-d700ffce.conformance.example (state none)"
     },
     {
       "suite": "relationship",
@@ -18599,11 +18739,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "affinidi-rust",
       "receiver": "dart",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "affinidi-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "found after 19 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18612,7 +18761,7 @@
       "sender": "affinidi-rust",
       "receiver": "dart",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-901ad530.conformance.example answers an invite we did not send"
+      "detail": "affinidi-rust refused: [relationship] message discarded: accept from did:web:endpoint-b-01d68553.conformance.example answers an invite we did not send"
     },
     {
       "suite": "relationship",
@@ -18630,7 +18779,7 @@
       "sender": "reference-rust",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-8b6e55a1.conformance.example with no relationship to did:web:endpoint-b-f23705f2.conformance.example"
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-b16a8cfa.conformance.example with no relationship to did:web:endpoint-b-c37f3c8a.conformance.example"
     },
     {
       "suite": "relationship",
@@ -18657,7 +18806,7 @@
       "sender": "reference-rust",
       "receiver": "affinidi-rust",
       "status": "fail",
-      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-ca748f75.conformance.example names an unrecognised relationship",
+      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-95a71825.conformance.example names an unrecognised relationship",
       "cause": "affinidi-rust endpoint.receive fails: [relationship] message discarded: cancellation from … names an unrecognised relationship",
       "finding": "affinidi-accepter-forgets-reply-digest"
     },
@@ -18682,11 +18831,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "reference-rust",
       "receiver": "affinidi-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "found after 38 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18713,7 +18871,7 @@
       "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-acfa018c.conformance.example to did:web:endpoint-b-e29e7319.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-7a840723.conformance.example to did:web:endpoint-b-7f5829d5.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
@@ -18763,11 +18921,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "reference-rust",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 18 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18844,11 +19011,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "reference-rust",
       "receiver": "tsp-js",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 1 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18875,7 +19051,7 @@
       "sender": "reference-rust",
       "receiver": "go",
       "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-84e55bbf.conformance.example\" without a relationship"
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-6084186c.conformance.example\" without a relationship"
     },
     {
       "suite": "relationship",
@@ -18925,11 +19101,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "reference-rust",
       "receiver": "go",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 12 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -18956,7 +19141,7 @@
       "sender": "reference-rust",
       "receiver": "dart",
       "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-80c702e0.conformance.example (state none)"
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-91b548a4.conformance.example (state none)"
     },
     {
       "suite": "relationship",
@@ -19006,11 +19191,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "reference-rust",
       "receiver": "dart",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "reference-rust",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "found after 88 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19037,7 +19231,7 @@
       "sender": "tsp-js",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-f85ea04a.conformance.example with no relationship to did:web:endpoint-b-1638d536.conformance.example"
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-45f23010.conformance.example with no relationship to did:web:endpoint-b-7b36cedd.conformance.example"
     },
     {
       "suite": "relationship",
@@ -19064,7 +19258,7 @@
       "sender": "tsp-js",
       "receiver": "affinidi-rust",
       "status": "fail",
-      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-45ab5bf6.conformance.example names an unrecognised relationship",
+      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-35b60e26.conformance.example names an unrecognised relationship",
       "cause": "affinidi-rust endpoint.receive fails: [relationship] message discarded: cancellation from … names an unrecognised relationship",
       "finding": "affinidi-accepter-forgets-reply-digest"
     },
@@ -19089,11 +19283,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "tsp-js",
       "receiver": "affinidi-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "found after 47 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19122,7 +19325,7 @@
       "sender": "tsp-js",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-ee750c31.conformance.example to did:web:endpoint-b-be3cc8d6.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-55415239.conformance.example to did:web:endpoint-b-f106970c.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
@@ -19172,11 +19375,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "tsp-js",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 139 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19255,11 +19467,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "tsp-js",
       "receiver": "tsp-js",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 12 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19288,7 +19509,7 @@
       "sender": "tsp-js",
       "receiver": "go",
       "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-d9a9ddb9.conformance.example\" without a relationship"
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-4deaf147.conformance.example\" without a relationship"
     },
     {
       "suite": "relationship",
@@ -19338,11 +19559,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "tsp-js",
       "receiver": "go",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 36 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19371,7 +19601,7 @@
       "sender": "tsp-js",
       "receiver": "dart",
       "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-81d2834c.conformance.example (state none)"
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-dbc2bbb6.conformance.example (state none)"
     },
     {
       "suite": "relationship",
@@ -19421,11 +19651,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "tsp-js",
       "receiver": "dart",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "tsp-js",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "found after 47 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19454,7 +19693,7 @@
       "sender": "go",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-24ffbc1f.conformance.example with no relationship to did:web:endpoint-b-db649d7e.conformance.example"
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-6a7269f4.conformance.example with no relationship to did:web:endpoint-b-a2686ccb.conformance.example"
     },
     {
       "suite": "relationship",
@@ -19463,7 +19702,7 @@
       "sender": "go",
       "receiver": "affinidi-rust",
       "status": "fail",
-      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-30501825.conformance.example names an unrecognised relationship",
+      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-1b5878bf.conformance.example names an unrecognised relationship",
       "cause": "affinidi-rust endpoint.receive fails: [relationship] message discarded: cancellation from … names an unrecognised relationship",
       "finding": "affinidi-accepter-forgets-reply-digest"
     },
@@ -19483,7 +19722,7 @@
       "sender": "go",
       "receiver": "affinidi-rust",
       "status": "fail",
-      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-c3888ca4.conformance.example names an unrecognised relationship",
+      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-a9f0214a.conformance.example names an unrecognised relationship",
       "cause": "affinidi-rust endpoint.receive fails: [relationship] message discarded: cancellation from … names an unrecognised relationship",
       "finding": "affinidi-accepter-forgets-reply-digest"
     },
@@ -19508,11 +19747,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "go",
       "receiver": "affinidi-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "found after 1 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19539,7 +19787,7 @@
       "sender": "go",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-687740ec.conformance.example to did:web:endpoint-b-7c7d24c4.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-58794f6d.conformance.example to did:web:endpoint-b-13251a46.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
@@ -19589,11 +19837,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "go",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 31 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19670,11 +19927,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "go",
       "receiver": "tsp-js",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 50 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19701,7 +19967,7 @@
       "sender": "go",
       "receiver": "go",
       "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-666065d7.conformance.example\" without a relationship"
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-1c1db282.conformance.example\" without a relationship"
     },
     {
       "suite": "relationship",
@@ -19751,11 +20017,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "go",
       "receiver": "go",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 69 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19782,7 +20057,7 @@
       "sender": "go",
       "receiver": "dart",
       "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-00dd9b60.conformance.example (state none)"
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-6a119fd6.conformance.example (state none)"
     },
     {
       "suite": "relationship",
@@ -19832,11 +20107,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "go",
       "receiver": "dart",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "go",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "found after 6 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19863,7 +20147,7 @@
       "sender": "dart",
       "receiver": "affinidi-rust",
       "status": "pass",
-      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-aae2464a.conformance.example with no relationship to did:web:endpoint-b-1ca112f7.conformance.example"
+      "detail": "affinidi-rust refused: [relationship] message discarded: application message from did:web:endpoint-a-cc46ffad.conformance.example with no relationship to did:web:endpoint-b-2e75207c.conformance.example"
     },
     {
       "suite": "relationship",
@@ -19890,7 +20174,7 @@
       "sender": "dart",
       "receiver": "affinidi-rust",
       "status": "fail",
-      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-6418c7b7.conformance.example names an unrecognised relationship",
+      "detail": "affinidi-rust endpoint.receive failed: [relationship] message discarded: cancellation from did:web:endpoint-a-8396ee0a.conformance.example names an unrecognised relationship",
       "cause": "affinidi-rust endpoint.receive fails: [relationship] message discarded: cancellation from … names an unrecognised relationship",
       "finding": "affinidi-accepter-forgets-reply-digest"
     },
@@ -19915,11 +20199,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "dart",
       "receiver": "affinidi-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "dart",
+      "receiver": "affinidi-rust",
+      "status": "pass",
+      "detail": "found after 29 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -19946,7 +20239,7 @@
       "sender": "dart",
       "receiver": "reference-rust",
       "status": "pass",
-      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-ead12122.conformance.example to did:web:endpoint-b-ac1709ba.conformance.example; the message is dropped"
+      "detail": "reference-rust refused: [relationship] Error: no relationship from did:web:endpoint-a-c84337c8.conformance.example to did:web:endpoint-b-856a282c.conformance.example; the message is dropped"
     },
     {
       "suite": "relationship",
@@ -19996,11 +20289,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "dart",
       "receiver": "reference-rust",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "dart",
+      "receiver": "reference-rust",
+      "status": "pass",
+      "detail": "found after 74 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -20077,11 +20379,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "dart",
       "receiver": "tsp-js",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "dart",
+      "receiver": "tsp-js",
+      "status": "pass",
+      "detail": "found after 10 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -20108,7 +20419,7 @@
       "sender": "dart",
       "receiver": "go",
       "status": "pass",
-      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-2f877410.conformance.example\" without a relationship"
+      "detail": "go refused: [relationship] tsp: relationship: application message from \"did:web:endpoint-a-076c06bf.conformance.example\" without a relationship"
     },
     {
       "suite": "relationship",
@@ -20158,11 +20469,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "dart",
       "receiver": "go",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "dart",
+      "receiver": "go",
+      "status": "pass",
+      "detail": "found after 106 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",
@@ -20189,7 +20509,7 @@
       "sender": "dart",
       "receiver": "dart",
       "status": "pass",
-      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-0147595e.conformance.example (state none)"
+      "detail": "dart refused: [relationship] application message without a relationship from did:web:endpoint-a-0016f9f2.conformance.example (state none)"
     },
     {
       "suite": "relationship",
@@ -20239,11 +20559,20 @@
     {
       "suite": "relationship",
       "case": "rfi-race-lower-digest-wins",
-      "spec": "§7.2.3",
+      "spec": "§7.2.3; tswg-tsp-specification#76 (raw bytes)",
       "sender": "dart",
       "receiver": "dart",
       "status": "pass",
       "detail": ""
+    },
+    {
+      "suite": "relationship",
+      "case": "invite-race-raw-byte-order",
+      "spec": "tswg-tsp-specification#76; §7.2.3 (raw digest bytes, not the CESR text)",
+      "sender": "dart",
+      "receiver": "dart",
+      "status": "pass",
+      "detail": "found after 20 invite pair(s): raw order and qb64 text order disagree"
     },
     {
       "suite": "relationship",

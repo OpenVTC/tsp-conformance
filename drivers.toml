@@ -6,6 +6,9 @@
 #   run      - shell command that starts the driver (JSON lines on stdin/stdout)
 #   enabled  - included when --drivers is not given
 #
+# drivers.local.toml (uncommitted, see drivers.local.toml.example) may override
+# any field of an entry by name and add `env`, e.g. to build against a worktree.
+#
 # A driver whose directory is missing, whose build fails, or that does not
 # answer `hello` is skipped and the reason is recorded in the report.
 
@@ -13,7 +16,7 @@
 name = "affinidi-rust"
 description = "affinidi-tsp (affinidi-tdk-rs), path dependency, feature pq"
 cwd = "drivers/affinidi-rust"
-build = "cargo +stable build --release"
+build = "./build.sh"   # honours AFFINIDI_TSP_PATH
 run = "target/release/tsp-driver-affinidi"
 enabled = true
 
@@ -29,7 +32,7 @@ enabled = true
 name = "tsp-js"
 description = "@openvtc/vti-tsp-js (pnm-browser-plugin/packages/tsp-js), built dist"
 cwd = "drivers/tsp-js"
-build = "cd ../../../pnm-browser-plugin/packages/tsp-js && npm run build"
+build = "cd \"${TSP_JS_DIR:-../../../pnm-browser-plugin/packages/tsp-js}\" && npm run build"   # driver.mjs honours TSP_JS_DIR too
 run = "node driver.mjs"
 enabled = true
 

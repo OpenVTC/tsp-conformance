@@ -392,7 +392,7 @@ fn resigned_signed_only(ctx: &mut Ctx, r: usize) {
     let text = v["message"].as_str().unwrap().to_string();
     let label = "resigned/direct-signed-only";
     type Build = fn(&str, &MessageMap, &Ident) -> Option<String>;
-    let cases: [(&str, &str, &[&str], Build); 4] = [
+    let cases: [(&str, &str, &[&str], Build); 6] = [
         ("non-canonical-lead-byte", "§3.7 (a receiver MUST reject non-zero lead/pad bits)", &["malformed"], |t, m, _| {
             let body = payload_body(t, m)?;
             let mut rd = cesr::Reader::new(body);
@@ -423,9 +423,17 @@ fn resigned_signed_only(ctx: &mut Ctx, r: usize) {
             let z = crate::resign::count_code('Z', body.len() / 4 + 1);
             Some(with_payload(t, m, &format!("{z}{body}")))
         }),
-        ("data-after-payload-fields", "§9.2.3 (the -A stream is the last field of XSCS)", &["malformed"], |t, m, _| {
+        ("xscs-body-h-group-json", "tswg-tsp-specification#77; §9.2.3 (XSCS body = -A## holding exactly one Bytes primitive)", &["malformed"], |t, m, _| {
+            let json = var_field('B', br#"{"hello":"world"}"#);
+            let group = format!("{}{json}", crate::resign::count_code('H', json.len() / 4));
+            with_stream(t, m, &group)
+        }),
+        ("xscs-body-two-bytes-primitives", "tswg-tsp-specification#77; §9.2.3 (exactly one Bytes primitive)", &["malformed"], |t, m, _| {
+            with_stream(t, m, &format!("{}{}", var_field('B', b"one"), var_field('B', b"two")))
+        }),
+        ("xscs-body-data-after-stream", "tswg-tsp-specification#77; §9.2.3 (the -A## stream ends the payload frame)", &["malformed"], |t, m, _| {
             let body = payload_body(t, m)?;
-            Some(with_payload(t, m, &payload(&format!("{body}4BAA"))))
+            Some(with_payload(t, m, &payload(&format!("{body}{}", var_field('B', b"x")))))
         }),
     ];
     let gate = ctx.gate(r, &["signed-only".into(), "payload.scs".into()], Dir::Open);
@@ -451,4 +459,20 @@ fn resigned_signed_only(ctx: &mut Ctx, r: usize) {
         };
         ctx.record(SUITE, &case, spec, "vector (re-signed)", &rname, o);
     }
+}
+
+/// Replace the `-A##` stream of a signed-only XSCS message, keeping the type
+/// code, ESSR field and padding.
+fn with_stream(t: &str, m: &MessageMap, stream: &str) -> Option<String> {
+    use crate::resign::{count_code, payload, payload_body, with_payload};
+    let body = payload_body(t, m)?;
+    let mut rd = cesr::Reader::new(body);
+    if rd.code4().ok()? != "XSCS" {
+        return None;
+    }
+    rd.var('B').ok()?;
+    rd.var('B').ok()?;
+    let head = &body[..rd.pos];
+    let new_body = format!("{head}{}{stream}", count_code('A', stream.len() / 4));
+    Some(with_payload(t, m, &payload(&new_body)))
 }

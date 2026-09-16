@@ -1,6 +1,8 @@
 # TSP Rev 3 conformance report
 
-Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T11:16:23Z with key seed `20260916`.
+Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T11:31:43Z with key seed `20260916`.
+
+> **Note:** This run builds affinidi-tsp and tsp-js from the unpushed #77 fix branches (affinidi-tdk-rs-wt-tsp77 fix/tsp-app-payload-single-bytes, pnm-browser-plugin-wt-tsp77) via drivers.local.toml, and the Go and Dart libraries at 815e3fe / f24ecc2; tsp_sdk is 0.11.0 from crates.io. Committed drivers.toml still points at the normal checkouts.
 
 Each case is **pass**, **fail** (with the diff), **skip** (a capability the implementation does not offer) or **error** (the harness or a driver broke). Cells read `✓ passed/ran` when nothing failed, `✗ passed/ran` when something did, `–` when every case skipped.
 
@@ -14,13 +16,18 @@ Each case is **pass**, **fail** (with the diff), **skip** (a capability the impl
 | go | affinidi-tsp-go | 0.1.0 | go | ran |
 | dart | affinidi-tsp-dart | 0.1.0 | dart | ran |
 
+Local overrides in effect (`drivers.local.toml`, not committed):
+
+- **affinidi-rust**: `AFFINIDI_TSP_PATH=/Users/glenngore/devel/affinidi-tdk-rs-wt-tsp77/crates/messaging/affinidi-tsp`
+- **tsp-js**: `TSP_JS_DIR=/Users/glenngore/devel/pnm-browser-plugin-wt-tsp77/packages/tsp-js`
+
 ## Summary
 
 | Suite | Pass | Fail | Error | Skip |
 |---|---:|---:|---:|---:|
 | interop | 868 | 25 | 0 | 157 |
-| negative | 368 | 9 | 0 | 68 |
-| relationship | 214 | 11 | 0 | 0 |
+| negative | 377 | 8 | 0 | 70 |
+| relationship | 239 | 11 | 0 | 0 |
 | vectors | 137 | 0 | 0 | 38 |
 
 ## Capability matrix
@@ -172,19 +179,21 @@ Aggregated over the message sources (the implementation's own output and the App
 | `non-canonical-lead-byte` | ✓ 1/1 | ✗ 0/1 | – | ✓ 1/1 | ✓ 1/1 |
 | `essr-sender-mismatch` | ✓ 1/1 | ✗ 0/1 | – | ✓ 1/1 | ✓ 1/1 |
 | `payload-count-too-large` | ✓ 1/1 | ✓ 1/1 | – | ✓ 1/1 | ✓ 1/1 |
-| `data-after-payload-fields` | ✗ 0/1 | ✓ 1/1 | – | ✓ 1/1 | ✓ 1/1 |
+| `xscs-body-h-group-json` | ✓ 1/1 | ✓ 1/1 | – | ✓ 1/1 | ✓ 1/1 |
+| `xscs-body-two-bytes-primitives` | ✓ 1/1 | ✓ 1/1 | – | ✓ 1/1 | ✓ 1/1 |
+| `xscs-body-data-after-stream` | ✓ 1/1 | ✓ 1/1 | – | ✓ 1/1 | ✓ 1/1 |
 
 ## Relationship matrix
 
 | A ↓ / B → | affinidi-rust | reference-rust | tsp-js | go | dart |
 |---|---|---|---|---|---|
-| **affinidi-rust** | ✗ 8/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 |
-| **reference-rust** | ✗ 8/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 |
-| **tsp-js** | ✗ 7/9 | ✗ 8/9 | ✗ 8/9 | ✗ 8/9 | ✗ 8/9 |
-| **go** | ✗ 7/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 |
-| **dart** | ✗ 8/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 | ✓ 9/9 |
+| **affinidi-rust** | ✗ 9/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **reference-rust** | ✗ 9/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **tsp-js** | ✗ 8/10 | ✗ 9/10 | ✗ 9/10 | ✗ 9/10 | ✗ 9/10 |
+| **go** | ✗ 8/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
+| **dart** | ✗ 9/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 | ✓ 10/10 |
 
-<details><summary>Per case (9 cases × 25 pairs)</summary>
+<details><summary>Per case (10 cases × 25 pairs)</summary>
 
 | Case | affin→affin | affin→refer | affin→tsp | affin→go | affin→dart | refer→affin | refer→refer | refer→tsp | refer→go | refer→dart | tsp→affin | tsp→refer | tsp→tsp | tsp→go | tsp→dart | go→affin | go→refer | go→tsp | go→go | go→dart | dart→affin | dart→refer | dart→tsp | dart→go | dart→dart |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -196,6 +205,7 @@ Aggregated over the message sources (the implementation's own output and the App
 | `cancel-by-accepter-naming-invite-digest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `cancel-by-accepter-naming-accept-digest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `rfi-race-lower-digest-wins` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `invite-race-raw-byte-order` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `accept-unknown-digest-refused` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 </details>
@@ -209,10 +219,9 @@ Failures attributed to an investigated root cause (`findings.toml`). *Kind*: `sp
 | 1 | tsp_sdk accepts a primitive whose lead bytes are non-zero | `spec-violation` | 1 |
 | 2 | tsp_sdk ignores bytes after the signature attachment; affinidi-tsp and tsp-js reject them | `disagreement` | 6 |
 | 3 | tsp_sdk does not check the ESSR sender field of a signed-only message | `disagreement` | 1 |
-| 4 | affinidi-tsp ignores data after the last field of an XSCS payload; tsp_sdk rejects it | `disagreement` | 1 |
-| 5 | affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest | `spec-violation` | 6 |
-| 6 | Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none | `limit` | 25 |
-| 7 | tsp-js's relationship rules accept an RFA that names an invite never sent | `api-gap` | 5 |
+| 4 | affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest | `spec-violation` | 6 |
+| 5 | Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none | `limit` | 25 |
+| 6 | tsp-js's relationship rules accept an RFA that names an invite never sent | `api-gap` | 5 |
 
 ### 1. tsp_sdk accepts a primitive whose lead bytes are non-zero
 
@@ -273,25 +282,7 @@ accepted a message with essr-sender-mismatch (source direct-signed-only (re-sign
 
 </details>
 
-### 4. affinidi-tsp ignores data after the last field of an XSCS payload; tsp_sdk rejects it
-
-**Kind:** `disagreement` · **Spec:** §9.2.3: the XSCS layout ends with the -A## stream
-
-An extra empty Bytes field is appended inside the `-Z` frame after the `-A` stream (both counts adjusted) and the `direct-signed-only` vector re-signed. tsp_sdk refuses ("frame count does not match the framed content": `cesr/packet.rs` `decode_opaque_data` requires the `-A` stream to fill the rest of the payload exactly). affinidi-tsp returns the payload: `message/direct.rs` `decode_payload_frame` checks that the body does not overrun the `-A` stream but never that the stream ends the frame. The extra bytes are covered by the sender's signature, so this is a canonicality/malleability point rather than a forgery. Static reading: tsp-js `rev3/payload.ts` `decodePayloadFrame` has the same shape (no end-of-frame check), untestable here without a signed-only reader.
-
-Observed in 1 case(s); for example `negative/resigned/direct-signed-only/data-after-payload-fields` (vector (re-signed) → affinidi-rust):
-
-```text
-accepted a message with data-after-payload-fields (source direct-signed-only (re-signed)); decoded payload type "scs"
-```
-
-<details><summary>Affected cases</summary>
-
-- `negative/resigned/direct-signed-only/data-after-payload-fields` vector (re-signed) → affinidi-rust
-
-</details>
-
-### 5. affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest
+### 4. affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest
 
 **Kind:** `spec-violation` · **Spec:** §7.2.2: "The Digest is recorded by both endpoints … and similarly Reply_Digest"; §7.3: the RFD Digest is "the previously received Digest or Reply_Digest"
 
@@ -314,7 +305,7 @@ affinidi-rust endpoint.receive failed: [relationship] message discarded: cancell
 
 </details>
 
-### 6. Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none
+### 5. Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none
 
 **Kind:** `limit` · **Spec:** §5.3: "the number of intermediaries in the route path may not be limited to 2"; no maximum is set
 
@@ -356,7 +347,7 @@ affinidi-rust refused to pack: [malformed] invalid message: route has 17 hops, e
 
 </details>
 
-### 7. tsp-js's relationship rules accept an RFA that names an invite never sent
+### 6. tsp-js's relationship rules accept an RFA that names an invite never sent
 
 **Kind:** `api-gap` · **Spec:** §7.2.2: the RFA's Digest is the digest of the corresponding TSP_RFI
 
@@ -378,6 +369,12 @@ tsp-js accepted an accept naming an invite it never sent (§7.2.2): event "accep
 
 </details>
 
+## Coverage notes
+
+**tsp-js: the #77 XSCS-body cases cannot run end to end** (tswg-tsp-specification#77)
+
+The #77 cases are built by editing and re-signing a signed-only message, because the runner implements no HPKE, and tsp-js has no signed-only reader, so they skip for tsp-js. The rule is covered at unit level in the library: `packages/tsp-js/tests/payload.app-stream.mjs` feeds `decodePayloadFrame` a single Bytes primitive (accepted), an `-H##` group, a second primitive, and data after the stream (all refused). No confidential path exists either: no driver can pack those bodies, and the deterministic packers (go, dart) take ephemeral keys but only for bodies they build themselves.
+
 ## Warnings
 
 Correct rejections under an error code other than the one expected (the specification mandates no taxonomy).
@@ -394,8 +391,8 @@ Correct rejections under an error code other than the one expected (the specific
 | Reason | Cases |
 |---|---:|
 | tsp-js lacks padding:pack | 35 |
+| tsp-js lacks signed-only:open | 33 |
 | tsp-js lacks sealed-box:open | 32 |
-| tsp-js lacks signed-only:open | 31 |
 | tsp-js lacks hpke-pq:open | 23 |
 | mutation not applicable to this source | 20 |
 | tsp-js lacks sealed-box:pack | 20 |
