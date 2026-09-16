@@ -1,0 +1,129 @@
+# Known root causes, used by the report to group failures.
+#
+# A failing or erroring case is attributed to the first finding whose `match`
+# regexes hit its `cause` or `detail` (and whose `suite`/`implementation`
+# filters, when given, agree). Anything unmatched is listed as unclassified,
+# grouped by the runner's own cause string — which is how a new disagreement
+# shows up. Each entry records what was established when it was investigated;
+# re-verify the evidence when an implementation moves.
+#
+#   kind: "spec-violation"   an implementation contradicts a MUST
+#         "disagreement"     implementations differ where the spec is silent or ambiguous
+#         "limit"            an implementation-chosen bound the spec does not set
+#         "api-gap"          the library cannot do what the protocol needs; integrators must
+
+[[finding]]
+id = "sdk-non-canonical-lead-bytes"
+kind = "spec-violation"
+title = "tsp_sdk accepts a primitive whose lead bytes are non-zero"
+implementation = "reference-rust"
+match = ["non-canonical-lead-byte"]
+spec = "§3.7: \"A receiver MUST reject a message containing a primitive whose pad bits are non-zero.\""
+explanation = """
+The `direct-signed-only` vector's application-data field is `5BAH…`: one lead byte, which must be zero. The \
+harness sets that byte non-zero and re-signs the message with alice's published key, so only a canonicality \
+check can catch it. affinidi-tsp refuses it (`wire.rs` `decode_variable_data_range` rejects non-zero lead \
+bytes, citing §3.7). tsp_sdk 0.11.0 returns the payload: `cesr/decode.rs` `decode_variable_data_index` computes \
+`data_begin = offset + 3` and skips the lead bytes without inspecting them. Because TSP signatures and digests \
+are taken over exact bytes, this admits two byte sequences for one value. Static reading: tsp-js \
+`cesr/wire.ts` `decodeVariableDataRange` has no lead-byte check either, but tsp-js has no signed-only reader, \
+so the case cannot reach it."""
+
+[[finding]]
+id = "sdk-trailing-bytes"
+kind = "disagreement"
+title = "tsp_sdk ignores bytes after the signature attachment; affinidi-tsp and tsp-js reject them"
+implementation = "reference-rust"
+match = ["trailing-bytes"]
+spec = "§9.1 (-E count delimits the signable content), §9.5 (-C count delimits the attachment); no explicit rule for data after the attachment"
+explanation = """
+Appending one zero triplet (`AAAA` in qb64) after a valid message: affinidi-tsp refuses (\"trailing bytes after \
+signature\"), tsp-js refuses (\"tsp: trailing bytes after signature\"), tsp_sdk 0.11.0 opens it — deliberately: \
+`cesr/packet.rs` `decode_envelope`: \"any data after the signature attachment is not part of this message (a \
+transport may deliver several messages back-to-back) and is ignored\". Every message source fails the same way \
+(its own output and five Appendix A vectors). The specification does not say whether a TSP message is a whole \
+transport unit; if it is, two distinct wire byte strings verify as the same message, which matters to anything \
+keyed on a hash of the wire bytes (affinidi's mediator deduplicates on exactly that)."""
+
+[[finding]]
+id = "sdk-signed-only-essr"
+kind = "disagreement"
+title = "tsp_sdk does not check the ESSR sender field of a signed-only message"
+implementation = "reference-rust"
+match = ["essr-sender-mismatch"]
+spec = "§3.7 step 7 and §8.2.2 require the check per PKAE variant; §9.4 says every payload layout carries VID_sndr; signed-only is not addressed explicitly"
+explanation = """
+The `direct-signed-only` vector's ESSR field (`4BAA`, NULL) is replaced with bob's VID and the message re-signed \
+with alice's key, so the envelope says alice and the payload says bob. affinidi-tsp refuses (\"ESSR sender VID \
+does not match the envelope sender\") because it checks the field for every layout. tsp_sdk 0.11.0 accepts: \
+`crypto/nonconfidential.rs` `verify_payload` decodes `sender_identity` and `crypto::verify` discards it; the \
+check exists only in `tsp_hpke::open` and `tsp_nacl::open`. The spec states the check only for the confidential \
+variants, so this is a gap to close in the spec as much as a behaviour to align."""
+
+[[finding]]
+id = "affinidi-data-after-payload"
+kind = "disagreement"
+title = "affinidi-tsp ignores data after the last field of an XSCS payload; tsp_sdk rejects it"
+implementation = "affinidi-rust"
+match = ["data-after-payload-fields"]
+spec = "§9.2.3: the XSCS layout ends with the -A## stream"
+explanation = """
+An extra empty Bytes field is appended inside the `-Z` frame after the `-A` stream (both counts adjusted) and the \
+`direct-signed-only` vector re-signed. tsp_sdk refuses (\"frame count does not match the framed content\": \
+`cesr/packet.rs` `decode_opaque_data` requires the `-A` stream to fill the rest of the payload exactly). \
+affinidi-tsp returns the payload: `message/direct.rs` `decode_payload_frame` checks that the body does not overrun \
+the `-A` stream but never that the stream ends the frame. The extra bytes are covered by the sender's signature, \
+so this is a canonicality/malleability point rather than a forgery. Static reading: tsp-js `rev3/payload.ts` \
+`decodePayloadFrame` has the same shape (no end-of-frame check), untestable here without a signed-only reader."""
+
+[[finding]]
+id = "affinidi-accepter-forgets-reply-digest"
+kind = "spec-violation"
+title = "affinidi-tsp, as the accepting endpoint, discards a cancellation that names its own accept's digest"
+implementation = "affinidi-rust"
+suite = "relationship"
+match = ["names an unrecognised relationship"]
+spec = "§7.2.2: \"The Digest is recorded by both endpoints … and similarly Reply_Digest\"; §7.3: the RFD Digest is \"the previously received Digest or Reply_Digest\""
+explanation = """
+After invite → accept, the inviter's library packs an RFD naming the accept's own digest (Reply_Digest — the \
+digest the inviter *received*) and it is delivered to affinidi-tsp's `TspAgent`, which refuses it (\"message \
+discarded: cancellation from … names an unrecognised relationship\") and stays bidirectional. The same RFD \
+naming the invite's digest is accepted, and tsp_sdk and tsp-js accept both. Cause: `TspAgent::\
+send_relationship_accept` (lib.rs) never records the accept it sends — `set_reply_thread_digest` is called only \
+when an accept is *received* — so `TspStore::recognizes_digest` on the accepting side holds the invite digest \
+alone, although its own documentation says \"a cancellation may name either, so both must be recognizable\". \
+The bundled endpoint APIs all happen to name the invite digest, so endpoint-to-endpoint flows hide it; the Go \
+implementation names the Reply_Digest and hit it first, which is what prompted the \
+`cancel-by-*-naming-*-digest` cases that now show it with any peer."""
+
+[[finding]]
+id = "hop-list-limits"
+kind = "limit"
+title = "Route length limits differ: tsp-js 10 hops, affinidi-tsp 16, tsp_sdk none"
+match = ["too many hops", "route has \\d+ hops, exceeds", "hop list too long"]
+spec = "§5.3: \"the number of intermediaries in the route path may not be limited to 2\"; no maximum is set"
+explanation = """
+tsp-js `cesr/wire.ts` `MAX_HOPS = 10`, enforced when packing (`packRouted`) and when decoding any VID list \
+(`rev3/fields.ts` `decodeVidList`, which also reads Reply_Path). affinidi-tsp `message/routed.rs` \
+`MAX_HOPS = 16`, enforced when packing and in `wire.rs` `decode_hops`. tsp_sdk sets none. So a 12-hop route \
+packed by affinidi-tsp or tsp_sdk cannot be opened by tsp-js, and a 17-hop route packed by tsp_sdk cannot be \
+opened by affinidi-tsp. A bound is reasonable; three different ones are not interoperable. The specification \
+could state a minimum every receiver must accept."""
+
+[[finding]]
+id = "tsp-js-accept-correlation"
+kind = "api-gap"
+title = "tsp-js's relationship rules accept an RFA that names an invite never sent"
+implementation = "tsp-js"
+suite = "relationship"
+match = ["accepts an accept naming an invite"]
+spec = "§7.2.2: the RFA's Digest is the digest of the corresponding TSP_RFI"
+explanation = """
+The inviter (tsp-js) is sent an RFA packed by the other implementation's library with a random Digest. \
+affinidi-tsp (`TspAgent::handle_control`: \"accept … answers an invite we did not send\") and tsp_sdk \
+(`SecureStore::upgrade_relation`: \"thread_id does not match digest\") refuse it and stay in invite-sent. tsp-js \
+ships its relationship rules as pure functions (`relationship.ts`) and leaves storage to the wallet; \
+`transition(\"pending\", \"receiveAccept\")` returns `bidirectional` without seeing a digest, and unlike the \
+invite race (`resolveInviteRace`) and cancellation (`resolveCancel`) there is no helper for accept correlation. \
+The driver applies only library rules, so the gap is visible here; every integrator of tsp-js must add the \
+check themselves."""

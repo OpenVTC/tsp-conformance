@@ -1,0 +1,27 @@
+[package]
+name = "tsp-conformance"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Cross-implementation conformance runner for the Trust Spanning Protocol (Rev 3)"
+
+# Standalone: the runner links no TSP implementation.
+[workspace]
+
+[[bin]]
+name = "tsp-conformance"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+base64 = "0.22"
+hex = "0.4"
+rand_core = "0.6"
+rand_chacha = "0.3"
+# key generation and the negative suite's re-signing tool only
+regex = "1"
+ed25519-dalek = "2"
+x25519-dalek = { version = "2", features = ["static_secrets"] }

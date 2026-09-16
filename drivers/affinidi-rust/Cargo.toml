@@ -1,0 +1,18 @@
+[package]
+name = "tsp-conformance-driver-affinidi"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "TSP conformance driver for affinidi-tsp"
+
+# Standalone: never resolved together with another implementation's graph.
+[workspace]
+
+[[bin]]
+name = "tsp-driver-affinidi"
+path = "src/main.rs"
+
+[dependencies]
+affinidi-tsp = { path = "../../../affinidi-tdk-rs/crates/messaging/affinidi-tsp", default-features = false, features = ["pq"] }
+serde_json = "1"
+base64 = "0.22"

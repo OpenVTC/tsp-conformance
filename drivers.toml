@@ -1,0 +1,53 @@
+# Drivers the runner can start. Paths are relative to this file.
+#
+#   name     - identifier used on the command line and in reports
+#   cwd      - directory the build and run commands execute in
+#   build    - shell command run by `tsp-conformance --build` (optional)
+#   run      - shell command that starts the driver (JSON lines on stdin/stdout)
+#   enabled  - included when --drivers is not given
+#
+# A driver whose directory is missing, whose build fails, or that does not
+# answer `hello` is skipped and the reason is recorded in the report.
+
+[[driver]]
+name = "affinidi-rust"
+description = "affinidi-tsp (affinidi-tdk-rs), path dependency, feature pq"
+cwd = "drivers/affinidi-rust"
+build = "cargo +stable build --release"
+run = "target/release/tsp-driver-affinidi"
+enabled = true
+
+[[driver]]
+name = "reference-rust"
+description = "ToIP reference tsp_sdk 0.11.0 from crates.io"
+cwd = "drivers/reference-rust"
+build = "cargo +stable build --release"
+run = "target/release/tsp-driver-reference"
+enabled = true
+
+[[driver]]
+name = "tsp-js"
+description = "@openvtc/vti-tsp-js (pnm-browser-plugin/packages/tsp-js), built dist"
+cwd = "drivers/tsp-js"
+build = "cd ../../../pnm-browser-plugin/packages/tsp-js && npm run build"
+run = "node driver.mjs"
+enabled = true
+
+# The Go and Dart drivers are maintained alongside their libraries; their
+# READMEs (drivers/go/README.md, drivers/dart/README.md) are authoritative for
+# these commands.
+[[driver]]
+name = "go"
+description = "affinidi-tsp-go (sibling checkout via replace)"
+cwd = "drivers/go"
+build = "go build -o tsp-driver ."
+run = "./tsp-driver"
+enabled = true
+
+[[driver]]
+name = "dart"
+description = "affinidi_tsp (affinidi-tsp-dart), path dependency, with affinidi_tsp_pq"
+cwd = "drivers/dart"
+build = "dart pub get && dart compile exe bin/tsp_driver.dart -o build/tsp_driver"
+run = "build/tsp_driver"
+enabled = true
