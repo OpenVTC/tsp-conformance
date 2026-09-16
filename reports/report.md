@@ -1,6 +1,8 @@
 # TSP Rev 3 conformance report
 
-Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T12:32:19Z with key seed `20260916`.
+> Built from affinidi-tdk-rs `main` @ `e4a7686` (includes #803, #804), vta-browser-plugin `feat/tsp-rev2-rev3-dual-handler` @ `ac7e829` (includes #249, #250), affinidi-tsp-go and affinidi-tsp-dart `main`, and tsp_sdk 0.11.0 from crates.io.
+
+Target **trustoverip/tswg-tsp-specification** at commit `f5b8668` (`YTSP-AAC`). Generated 2026-09-16T13:07:47Z with key seed `20260916`.
 
 Each case is **pass**, **fail** (with the diff), **skip** (a capability the implementation does not offer) or **error** (the harness or a driver broke). Cells read `✓ passed/ran` when nothing failed, `✗ passed/ran` when something did, `–` when every case skipped.
 
@@ -16,8 +18,8 @@ Each case is **pass**, **fail** (with the diff), **skip** (a capability the impl
 
 Local overrides in effect (`drivers.local.toml`, not committed):
 
-- **affinidi-rust**: `AFFINIDI_TSP_PATH=/Users/glenngore/devel/affinidi-tdk-rs-wt-tsprel/crates/messaging/affinidi-tsp`
-- **tsp-js**: `TSP_JS_DIR=/Users/glenngore/devel/pnm-browser-plugin-wt-tsprel/packages/tsp-js`
+- **affinidi-rust**: `AFFINIDI_TSP_PATH=~/devel/affinidi-tdk-rs-wt-tsprel/crates/messaging/affinidi-tsp`
+- **tsp-js**: `TSP_JS_DIR=~/devel/pnm-browser-plugin-wt-tsprel/packages/tsp-js`
 
 ## Summary
 

@@ -79,7 +79,7 @@ pub fn load_config(path: &Path) -> Result<Config, String> {
             if let Some(v) = o.run { d.run = v; changed.push("run".into()); }
             if let Some(v) = o.enabled { d.enabled = v; }
             for (k, v) in o.env {
-                changed.push(format!("{k}={v}"));
+                changed.push(format!("{k}={}", redact_home(&v)));
                 d.env.insert(k, v);
             }
             d.overridden = changed;
@@ -301,5 +301,14 @@ impl Driver {
 impl Drop for Driver {
     fn drop(&mut self) {
         self.kill();
+    }
+}
+
+/// Replaces the user's home directory with `~`, so a committed report does not
+/// carry a local absolute path.
+fn redact_home(v: &str) -> String {
+    match std::env::var("HOME") {
+        Ok(home) if !home.is_empty() => v.replace(&home, "~"),
+        _ => v.to_string(),
     }
 }

@@ -44,9 +44,19 @@ and in the capability matrix, never as a failure.
 ## Running it
 
 Prerequisites: a stable Rust toolchain (`cargo +stable`; tsp_sdk needs newer
-than the affinidi-tdk-rs pin), Node ≥ 20 with `npm`, and sibling checkouts of
-`affinidi-tdk-rs` and `pnm-browser-plugin` next to this directory. Go and Dart
-only for their drivers.
+than the affinidi-tdk-rs pin), Node ≥ 20 with `npm`, and Go ≥ 1.27 and Dart ≥ 3.10
+for their drivers. The drivers build the implementations from sibling checkouts
+next to this directory:
+
+```sh
+git clone https://github.com/affinidi/affinidi-tdk-rs
+git clone -b feat/tsp-rev2-rev3-dual-handler https://github.com/OpenVTC/vta-browser-plugin pnm-browser-plugin   # tsp-js (Rev 3 is not on main yet)
+git clone https://github.com/affinidi/affinidi-tsp-go
+git clone https://github.com/affinidi/affinidi-tsp-dart
+```
+
+The reference implementation comes from crates.io. To test other checkouts or
+branches, copy `drivers.local.toml.example` to `drivers.local.toml`.
 
 ```sh
 make build        # runner + every driver's build command
