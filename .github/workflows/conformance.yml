@@ -1,0 +1,130 @@
+name: conformance
+
+# Builds all five implementations from source and runs the full matrix.
+# Gate: `--gate known` fails on any failure no finding in findings.toml explains,
+# on a failure matching a finding marked `fixed` (a regression), and on any
+# driver that did not build or start.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * 1" # weekly, to catch upstream moves
+  workflow_dispatch:
+    inputs:
+      affinidi_tdk_rs_ref:
+        description: affinidi/affinidi-tdk-rs ref
+        default: main
+      vta_browser_plugin_ref:
+        description: OpenVTC/vta-browser-plugin ref (tsp-js)
+        default: feat/tsp-rev2-rev3-dual-handler
+      affinidi_tsp_go_ref:
+        description: affinidi/affinidi-tsp-go ref
+        default: main
+      affinidi_tsp_dart_ref:
+        description: affinidi/affinidi-tsp-dart ref
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: conformance-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      # The drivers build each implementation from a sibling checkout, so the
+      # workspace mirrors the layout in README.md.
+      - uses: actions/checkout@v5
+        with:
+          path: tsp-conformance
+      - uses: actions/checkout@v5
+        with:
+          repository: affinidi/affinidi-tdk-rs
+          ref: ${{ inputs.affinidi_tdk_rs_ref || 'main' }}
+          path: affinidi-tdk-rs
+      - uses: actions/checkout@v5
+        with:
+          repository: OpenVTC/vta-browser-plugin
+          ref: ${{ inputs.vta_browser_plugin_ref || 'feat/tsp-rev2-rev3-dual-handler' }}
+          path: pnm-browser-plugin
+      - uses: actions/checkout@v5
+        with:
+          repository: affinidi/affinidi-tsp-go
+          ref: ${{ inputs.affinidi_tsp_go_ref || 'main' }}
+          path: affinidi-tsp-go
+      - uses: actions/checkout@v5
+        with:
+          repository: affinidi/affinidi-tsp-dart
+          ref: ${{ inputs.affinidi_tsp_dart_ref || 'main' }}
+          path: affinidi-tsp-dart
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            tsp-conformance/runner -> target
+            tsp-conformance/drivers/affinidi-rust -> target
+            tsp-conformance/drivers/reference-rust -> target
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: pnm-browser-plugin/package-lock.json
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.27"
+          cache-dependency-path: tsp-conformance/drivers/go/go.sum
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install tsp-js dependencies
+        working-directory: pnm-browser-plugin
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Runner unit tests
+        working-directory: tsp-conformance
+        run: cargo +stable test --manifest-path runner/Cargo.toml
+
+      - name: Build runner
+        working-directory: tsp-conformance
+        run: cargo +stable build --release --manifest-path runner/Cargo.toml
+
+      - name: Build drivers and run the matrix
+        working-directory: tsp-conformance
+        run: |
+          sha() { git -C "../$1" rev-parse --short HEAD; }
+          note="CI run ${GITHUB_RUN_ID}: affinidi-tdk-rs $(sha affinidi-tdk-rs), vta-browser-plugin $(sha pnm-browser-plugin), affinidi-tsp-go $(sha affinidi-tsp-go), affinidi-tsp-dart $(sha affinidi-tsp-dart), tsp_sdk from crates.io"
+          runner/target/release/tsp-conformance \
+            --build \
+            --seed "${GITHUB_RUN_ID}" \
+            --gate known \
+            --note "$note" \
+            --json ci-report/report.json \
+            --markdown ci-report/report.md
+
+      - name: Summary
+        if: always()
+        working-directory: tsp-conformance
+        run: |
+          if [ -f ci-report/report.md ]; then
+            sed -n '1,/^## Capability matrix/p' ci-report/report.md | sed '$d' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: conformance-report
+          path: |
+            tsp-conformance/ci-report/
+            tsp-conformance/reports/logs/
+          if-no-files-found: ignore

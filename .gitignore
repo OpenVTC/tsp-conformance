@@ -2,3 +2,4 @@ target/
 reports/logs/
 drivers/*/node_modules/
 drivers.local.toml
+ci-report/
