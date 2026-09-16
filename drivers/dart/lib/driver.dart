@@ -244,11 +244,6 @@ Map<String, Object?> _payloadOut(TspMessage m) {
   switch (p) {
     case ScsPayload() || CtlPayload():
       final data = (p as StreamPayload).data;
-      if (data == null) {
-        throw _unsupported(
-          'the payload stream is not a single Bytes primitive',
-        );
-      }
       out['type'] = p is ScsPayload ? 'scs' : 'ctl';
       out['data'] = _b64(data);
     case PadPayload(:final nonce):

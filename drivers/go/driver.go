@@ -453,9 +453,6 @@ func payloadResult(m *tsp.Message) (map[string]any, error) {
 		} else {
 			out["type"], data = "ctl", p.(*tsp.CTL).Data
 		}
-		if data == nil {
-			return nil, fail("unsupported", "payload stream is not a single Bytes primitive")
-		}
 		out["data"] = b64e(data)
 	case *tsp.PAD:
 		out["type"], out["nonce"] = "pad", b64e(p.Nonce)
@@ -754,9 +751,6 @@ func (d *driver) endpointReceive(raw []byte) (any, error) {
 	case tsp.EventCancel:
 		out["event"], out["digest"] = "cancel", digestStr(ev.Digest)
 	case tsp.EventMessage:
-		if ev.Data == nil {
-			return nil, fail("unsupported", "payload stream is not a single Bytes primitive")
-		}
 		out["event"], out["data"] = "message", b64e(ev.Data)
 	default:
 		return nil, fail("unsupported", "endpoint.receive of a %v message", ev.Kind)
