@@ -2,7 +2,8 @@
 //! text and re-signing with the sender's (published or generated) Ed25519 key.
 //!
 //! Only signed-only messages can be derived this way: a confidential payload
-//! would also have to be re-encrypted, and the runner implements no HPKE.
+//! would also have to be re-encrypted. The one confidential probe the suite
+//! needs is built from scratch instead, in `seal.rs`.
 //! Re-signing is what isolates the property under test — without it every
 //! edit is caught by the signature before the check of interest is reached.
 

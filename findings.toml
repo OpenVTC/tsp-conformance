@@ -16,7 +16,69 @@
 #          regression, and `--gate known` (the CI gate) fails on it.
 
 [[finding]]
+id = "sdk-null-essr-sender-confidential"
+kind = "spec-violation"
+title = "tsp_sdk 0.16.0 accepts a confidential payload whose ESSR sender is NULL"
+implementation = "reference-rust"
+match = ["a NULL ESSR sender in a confidential payload"]
+spec = "§3.7 step 7 (1.0): \"For both PKAE variants, retrieve the sender VID from the decrypted payload plaintext and verify that it matches VID_sndr.\" §3.2: \"For all PKAE schemes, the VID_sndr MUST appear as a confidential payload field.\""
+explanation = """
+1.0 (tswg-tsp-specification#86) made the ESSR sender field mandatory in every confidential payload; Rev 3 let \
+HPKE-Base write the NULL VID `4BAA`. tsp_sdk 0.16.0 moved its *send* side (`EssrSender` defaults to `Always`) \
+but not its receive side: `crypto/tsp_hpke.rs` `open_payload` still reads the field as optional \
+(`if let Some(id) = sender_identity && id != envelope.sender`), under a comment that still says \"In HPKE-Base \
+the sender-VID confidential field is optional\", and `cesr/packet.rs` `decode_sender_identity` maps an empty \
+field to `None`. The runner seals a 1.0 HPKE-Base XSCS with a NULL sender (`runner/src/seal.rs`), after a \
+control naming the sender opens; tsp_sdk returns the payload. affinidi-tsp 0.3.0 and tsp-js 0.4.0 refuse it."""
+
+[[finding]]
+id = "go-rev3"
+kind = "spec-violation"
+title = "affinidi-tsp-go still speaks Rev 3 (YTSP-AAC, 0.2), not 1.0"
+implementation = "go"
+match = [".*"]
+spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
+explanation = """
+affinidi-tsp-go `main` packs `YTSP-AAC` (`payload.go` `CurrentVersion`) and refuses MAJOR 1, so every case \
+pairing it with a 1.0 implementation, and every 1.0 vector, fails on the version; within Rev 3 it may also \
+write a NULL ESSR sender under HPKE-Base, which 1.0 forbids. Until the library moves to 1.0 every failure \
+involving it is attributed here — remove this entry when it does, so its remaining failures are seen."""
+
+[[finding]]
+id = "dart-rev3"
+kind = "spec-violation"
+title = "affinidi-tsp-dart still speaks Rev 3 (YTSP-AAC, 0.2), not 1.0"
+implementation = "dart"
+match = [".*"]
+spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
+explanation = """
+affinidi-tsp-dart `main` packs `YTSP-AAC` and refuses MAJOR 1, so every case pairing it with a 1.0 \
+implementation, and every 1.0 vector, fails on the version. Separately, its driver no longer builds from a \
+fresh checkout: the library became a workspace (`packages/affinidi_tsp`), and `drivers/dart/pubspec.yaml` \
+still points at the repository root. Until the library moves to 1.0 every failure involving it is attributed \
+here — remove this entry when it does."""
+
+[[finding]]
+id = "go-rev3-inner"
+kind = "spec-violation"
+title = "a nested message whose inner message affinidi-tsp-go packed (Rev 3) is refused"
+match = ["inner-by-go"]
+spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
+explanation = """See `go-rev3`. The outer parties here are 1.0 implementations, so the `implementation` \
+filter of that entry cannot reach these; the inner message is the Go library's, at YTSP-AAC."""
+
+[[finding]]
+id = "dart-rev3-inner"
+kind = "spec-violation"
+title = "a nested message whose inner message affinidi-tsp-dart packed (Rev 3) is refused"
+match = ["inner-by-dart"]
+spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
+explanation = """See `dart-rev3`. The outer parties here are 1.0 implementations; the inner message is the \
+Dart library's, at YTSP-AAC."""
+
+[[finding]]
 id = "sdk-non-canonical-lead-bytes"
+fixed = "tsp_sdk 0.16.0 (passes there; the first release between 0.11.0 and 0.16.0 to fix it is not bisected)"
 kind = "spec-violation"
 title = "tsp_sdk accepts a primitive whose lead bytes are non-zero"
 implementation = "reference-rust"
@@ -34,6 +96,7 @@ so the case cannot reach it."""
 
 [[finding]]
 id = "sdk-trailing-bytes"
+fixed = "tsp_sdk 0.16.0 (passes there; the first release between 0.11.0 and 0.16.0 to fix it is not bisected)"
 kind = "disagreement"
 title = "tsp_sdk ignores bytes after the signature attachment; affinidi-tsp and tsp-js reject them"
 implementation = "reference-rust"
@@ -50,6 +113,7 @@ keyed on a hash of the wire bytes (affinidi's mediator deduplicates on exactly t
 
 [[finding]]
 id = "sdk-signed-only-essr"
+fixed = "tsp_sdk 0.16.0 (passes there; the first release between 0.11.0 and 0.16.0 to fix it is not bisected)"
 kind = "disagreement"
 title = "tsp_sdk does not check the ESSR sender field of a signed-only message"
 implementation = "reference-rust"

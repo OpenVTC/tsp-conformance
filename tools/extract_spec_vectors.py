@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract TSP Rev 3 Appendix A test vectors from the specification markdown.
+"""Extract TSP Appendix A test vectors from the specification markdown.
 
 Usage: extract_spec_vectors.py <path/to/spec.md> <spec-commit> > fixtures/spec-vectors.json
 

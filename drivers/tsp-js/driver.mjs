@@ -12,8 +12,8 @@
 // `resolveAccept` get no accept-to-invite correlation.
 //
 // Deterministic pack: tsp-js's test-only `unsafe-testing` subpath derives the
-// HPKE-Base ephemeral from a caller `ikmE` and can write the NULL VID in the
-// ESSR sender field, which is what reproducing Appendix A needs. It is loaded
+// HPKE-Base ephemeral from a caller `ikmE`, which is what reproducing Appendix A
+// needs (since 0.4.0, TSP 1.0, it no longer writes a NULL ESSR sender). It is loaded
 // only if the build has it, so the driver still runs against older builds and
 // simply does not advertise `deterministic`.
 
@@ -67,7 +67,9 @@ function classify(e) {
   const message = e?.message ?? String(e);
   let code = "internal";
   if (e?.code === "E_TSP_TRANSITION") code = "relationship";
-  else if (e?.code === "E_TSP_REVISION") code = /MAJOR/.test(message) ? "version" : "malformed";
+  // A MAJOR the library does not speak is a version refusal; an E_TSP_REVISION
+  // at its own MAJOR is a parse failure it attributes to an unknown MINOR.
+  else if (e?.code === "E_TSP_REVISION") code = e.major !== undefined && e.major !== tsp.SUPPORTED_MAJOR ? "version" : "malformed";
   else if (/does not support|this implementation does not/.test(message)) code = "unsupported";
   else if (/signature verification failed|signature names key index/.test(message)) code = "signature";
   else if (/TSP_Digest/.test(message)) code = "digest";
@@ -101,14 +103,15 @@ function identity(v, what) {
  * call shapes either way, so the switch below does not branch on it.
  */
 function packersFor(req, p, sender) {
-  const nullSender = "payloadSender" in p && p.payloadSender === null;
-  if ("payloadSender" in p && p.payloadSender !== null && p.payloadSender !== sender.id) {
-    throw unsupported("tsp-js writes the envelope sender's VID (or NULL) in the ESSR field");
+  if ("payloadSender" in p && p.payloadSender === null) {
+    // Every payload tsp-js packs is confidential, and TSP 1.0 requires the
+    // sender there.
+    throw new DriverError("invalid-input", "TSP 1.0 requires the sender VID in a confidential payload (§3.2, §3.7 step 7)");
+  }
+  if ("payloadSender" in p && p.payloadSender !== sender.id) {
+    throw unsupported("tsp-js writes the envelope sender's VID in the ESSR field");
   }
   if (req.ephemeral == null) {
-    if (nullSender) {
-      throw unsupported("tsp-js writes the sender VID in the ESSR field; NULL only with a pinned ephemeral");
-    }
     return {
       pack: tsp.pack,
       packInvite: tsp.packInvite,
@@ -123,7 +126,7 @@ function packersFor(req, p, sender) {
     throw unsupported("tsp-js pins an HPKE-Base ikmE only (no sealed box, so no skEm)");
   }
   const u = unsafeTesting;
-  const det = { __unsafeIkmE: b64d(req.ephemeral.ikmE), nullPayloadSender: nullSender };
+  const det = { __unsafeIkmE: b64d(req.ephemeral.ikmE) };
   return {
     pack: (body, s, r, k) => u.__unsafeDeterministicPack(body, s, r, k, det),
     packInvite: (s, r, k, opts) => {

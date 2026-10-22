@@ -9,8 +9,8 @@ A driver is a thin adapter. It must not implement TSP itself — every byte it
 returns must come from the library under test. If the library cannot do
 something, the driver answers `unsupported`; it never fills the gap.
 
-Target: **TSP Rev 3**, `YTSP-AAC` (spec `trustoverip/tswg-tsp-specification`
-commit `f5b8668`). Fixture: `fixtures/spec-vectors.json`.
+Target: **TSP 1.0**, `YTSP-BAA` (spec `trustoverip/tswg-tsp-specification`
+commit `ccda6b3`). Fixture: `fixtures/spec-vectors.json`.
 
 ## 1. Framing
 
@@ -92,7 +92,9 @@ Every payload additionally carries:
   NULL VID `4BAA`. On input to `pack`: omit to take the library's default for
   the scheme; `null` to request NULL; a string to request that VID. A library
   that does not let the caller choose returns `unsupported` only if the
-  requested value differs from what it would do.
+  requested value differs from what it would do. TSP 1.0 forbids NULL in a
+  confidential payload: a request for it under `hpke-base`, `hpke-pq` or
+  `sealed-box` must be refused (any error code).
 
 `rfi`/`rfa` digests on input: `rfi.digest` and `rfa.replyDigest` are always
 computed by the library. `rfa.digest` and `rfd.digest` are supplied by the
@@ -119,7 +121,7 @@ Capabilities (strings):
 | `rfi.reply-path` `rfi.referral` | non-empty `replyPath` / `referral` |
 | `payload.hop` | nested and routed |
 | `padding` | caller-chosen non-empty padding |
-| `payload-sender` | caller choice of NULL vs present ESSR sender |
+| `payload-sender` | caller choice of NULL vs present ESSR sender (NULL only where 1.0 allows it: signed-only) |
 | `deterministic` | `pack` honours `ephemeral` (and caller nonces), making output byte-reproducible |
 | `peek` | the `peek` op |
 | `endpoint` | the stateful `endpoint.*` ops (§5) |

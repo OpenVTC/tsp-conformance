@@ -1,4 +1,4 @@
-//! Conformance driver for the ToIP reference implementation, `tsp_sdk` 0.11.0.
+//! Conformance driver for the ToIP reference implementation, `tsp_sdk` 0.16.0.
 //!
 //! Stateless ops use `tsp_sdk::crypto::{seal_*, open, sign, verify}`; padding
 //! is reachable only through `SecureStore` (`SendOptions::padding`), so a pack
@@ -157,17 +157,17 @@ fn op_pack(req: &Value) -> DResult<Value> {
         }
     };
 
-    // ESSR sender field: NULL under HPKE-Base and signed-only, the sender under
-    // the sealed box. The public API offers no choice (EssrSender is only
-    // reachable through a crate-private selection).
+    // ESSR sender field: since 0.16 the sender in every confidential payload
+    // (TSP 1.0), NULL only when signed-only. The public API offers no choice
+    // (EssrSender is only reachable through a crate-private selection).
     if let Some(ps) = payload.get("payloadSender") {
-        let lib_default_null = crypto_type != Some(CryptoType::SealedBox);
+        let lib_default_null = crypto_type.is_none();
         let requested_null = ps.is_null();
         if requested_null != lib_default_null
             || ps.as_str().is_some_and(|s| s != sender.id)
         {
             return Err(unsupported(
-                "tsp_sdk chooses the ESSR sender field by scheme (NULL under HPKE-Base and signed-only)",
+                "tsp_sdk chooses the ESSR sender field by scheme (the sender when confidential, NULL when signed-only)",
             ));
         }
     }
@@ -457,37 +457,27 @@ fn endpoint<'a>(st: &'a State, req: &Value) -> DResult<&'a Endpoint> {
         .ok_or_else(|| err("invalid-input", format!("unknown endpoint {h}")))
 }
 
-/// Map the reference's relationship status to the protocol's.
-///
-/// `SecureStore` records each side's own-direction digest as `thread_id` and
-/// the other as `remote_thread_id`: the inviter holds (invite, accept) and the
-/// accepter (accept, invite). Which side this endpoint was is read from the
-/// digest the invite recorded while the relationship was forming.
-fn state_json(status: RelationshipStatus, invite: Option<&Digest>) -> Value {
+/// Map the reference's relationship status to the protocol's. Since 0.16 the
+/// reference names the two digests by role (`invite_digest`, `reply_digest`),
+/// which is exactly the protocol's `digest` and `replyDigest`.
+fn state_json(status: RelationshipStatus) -> Value {
     match status {
         RelationshipStatus::Unrelated => json!({"state": "none"}),
-        RelationshipStatus::Unidirectional { thread_id } => {
-            json!({"state": "invite-sent", "digest": b64e(&thread_id)})
+        RelationshipStatus::Unidirectional { invite_digest } => {
+            json!({"state": "invite-sent", "digest": b64e(&invite_digest)})
         }
-        RelationshipStatus::ReverseUnidirectional { thread_id } => {
-            json!({"state": "invite-received", "digest": b64e(&thread_id)})
+        RelationshipStatus::ReverseUnidirectional { invite_digest } => {
+            json!({"state": "invite-received", "digest": b64e(&invite_digest)})
         }
         RelationshipStatus::Bidirectional {
-            thread_id,
-            remote_thread_id,
+            invite_digest,
+            reply_digest,
             ..
-        } => {
-            let (d, r) = if invite == Some(&remote_thread_id) {
-                (remote_thread_id, thread_id)
-            } else {
-                (thread_id, remote_thread_id)
-            };
-            json!({"state": "bidirectional", "digest": b64e(&d), "replyDigest": b64e(&r)})
-        }
+        } => json!({"state": "bidirectional", "digest": b64e(&invite_digest), "replyDigest": b64e(&reply_digest)}),
     }
 }
 
-fn op_endpoint(st: &mut State, invites: &mut HashMap<(String, String, String), Digest>, op: &str, req: &Value) -> DResult<Value> {
+fn op_endpoint(st: &mut State, op: &str, req: &Value) -> DResult<Value> {
     match op {
         "endpoint.create" => {
             let store = SecureStore::new();
@@ -511,17 +501,16 @@ fn op_endpoint(st: &mut State, invites: &mut HashMap<(String, String, String), D
             let ep = endpoint(st, req)?;
             let (_, msg) = ep.store.make_relationship_request(from, to, None).map_err(serr)?;
             let status = ep.store.relation_status_for_vid_pair(from, to).map_err(serr)?;
-            let RelationshipStatus::Unidirectional { thread_id } = status else {
+            let RelationshipStatus::Unidirectional { invite_digest } = status else {
                 return Err(err("internal", format!("after invite, status is {status}")));
             };
-            invites.insert((str_field(req, "endpoint")?.into(), from.into(), to.into()), thread_id);
-            Ok(json!({"message": b64e(&msg), "digest": b64e(&thread_id)}))
+            Ok(json!({"message": b64e(&msg), "digest": b64e(&invite_digest)}))
         }
         "endpoint.accept" => {
             let (from, to) = (str_field(req, "from")?, str_field(req, "to")?);
             let ep = endpoint(st, req)?;
             let status = ep.store.relation_status_for_vid_pair(from, to).map_err(serr)?;
-            let RelationshipStatus::ReverseUnidirectional { thread_id } = status else {
+            let RelationshipStatus::ReverseUnidirectional { invite_digest: thread_id } = status else {
                 return Err(err("relationship", format!("no invite to accept; status is {status}")));
             };
             let (_, msg) = ep
@@ -529,10 +518,9 @@ fn op_endpoint(st: &mut State, invites: &mut HashMap<(String, String, String), D
                 .make_relationship_accept(from, to, thread_id, None)
                 .map_err(serr)?;
             let reply = match ep.store.relation_status_for_vid_pair(from, to).map_err(serr)? {
-                RelationshipStatus::Bidirectional { thread_id: own, .. } => own,
+                RelationshipStatus::Bidirectional { reply_digest, .. } => reply_digest,
                 other => return Err(err("internal", format!("after accept, status is {other}"))),
             };
-            invites.insert((str_field(req, "endpoint")?.into(), from.into(), to.into()), thread_id);
             Ok(json!({"message": b64e(&msg), "digest": b64e(&thread_id), "replyDigest": b64e(&reply)}))
         }
         "endpoint.cancel" => {
@@ -549,7 +537,6 @@ fn op_endpoint(st: &mut State, invites: &mut HashMap<(String, String, String), D
             Ok(json!({"message": b64e(&msg)}))
         }
         "endpoint.receive" => {
-            let handle = str_field(req, "endpoint")?.to_string();
             let mut bytes = bytes_field(req, "message")?;
             let ep = endpoint(st, req)?;
             let received = ep.store.open_message(&mut bytes).map_err(serr)?;
@@ -579,7 +566,6 @@ fn op_endpoint(st: &mut State, invites: &mut HashMap<(String, String, String), D
                     reply_thread_id,
                     ..
                 } => {
-                    invites.insert((handle, receiver.clone(), sender.clone()), thread_id);
                     json!({"event": "accept", "from": sender, "to": receiver,
                            "digest": b64e(&thread_id), "replyDigest": b64e(&reply_thread_id)})
                 }
@@ -601,8 +587,7 @@ fn op_endpoint(st: &mut State, invites: &mut HashMap<(String, String, String), D
             let (local, remote) = (str_field(req, "local")?, str_field(req, "remote")?);
             let ep = endpoint(st, req)?;
             let status = ep.store.relation_status_for_vid_pair(local, remote).map_err(serr)?;
-            let invite = invites.get(&(str_field(req, "endpoint")?.into(), local.into(), remote.into()));
-            Ok(state_json(status, invite))
+            Ok(state_json(status))
         }
         other => Err(unsupported(format!("op {other}"))),
     }
@@ -610,11 +595,10 @@ fn op_endpoint(st: &mut State, invites: &mut HashMap<(String, String, String), D
 
 fn main() {
     let mut st = State::default();
-    let mut invites = HashMap::new();
     proto::run(|op, req| match op {
         "hello" => Ok(json!({
             "name": "tsp_sdk",
-            "version": "0.11.0",
+            "version": "0.16.0",
             "language": "rust",
             "protocol": 1,
             "capabilities": CAPABILITIES,
@@ -622,7 +606,7 @@ fn main() {
         "pack" => op_pack(req),
         "open" => op_open(req),
         "peek" => op_peek(req),
-        op if op.starts_with("endpoint.") => op_endpoint(&mut st, &mut invites, op, req),
+        op if op.starts_with("endpoint.") => op_endpoint(&mut st, op, req),
         other => Err(unsupported(format!("op {other}"))),
     });
 }

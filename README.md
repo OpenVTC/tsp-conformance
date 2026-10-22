@@ -1,7 +1,10 @@
-# TSP Rev 3 conformance suite
+# TSP 1.0 conformance suite
 
-A cross-implementation conformance suite for the **Trust Spanning Protocol, Rev 3**
-(`YTSP-AAC`, `trustoverip/tswg-tsp-specification` commit `f5b8668`).
+A cross-implementation conformance suite for the **Trust Spanning Protocol 1.0**
+(`YTSP-BAA`, `trustoverip/tswg-tsp-specification` commit `ccda6b3`). 1.0 is Rev 3
+(`YTSP-AAC`) with the ESSR sender VID made mandatory in every confidential
+payload; an implementation still on Rev 3 is refused on MAJOR by a 1.0 one, and
+the report says so.
 
 It answers three questions about every implementation it is given:
 
@@ -28,7 +31,7 @@ docs/driver-protocol.md   the driver contract (JSON lines over stdin/stdout)
 docs/cases.md             every case, what it asserts, the spec section it traces to
 runner/                   `tsp-conformance`, the Rust runner (links no TSP implementation)
 drivers/affinidi-rust/    driver for affinidi-tsp (path dependency, feature pq)
-drivers/reference-rust/   driver for the ToIP reference tsp_sdk 0.11.0 (crates.io)
+drivers/reference-rust/   driver for the ToIP reference tsp_sdk 0.16.0 (crates.io)
 drivers/tsp-js/           driver for @openvtc/vti-tsp-js (Node, imports its built dist)
 drivers/go/, drivers/dart/  maintained with the Go and Dart libraries
 reports/                  report.json, report.md, logs/ (driver stderr, build output)
@@ -50,7 +53,7 @@ next to this directory:
 
 ```sh
 git clone https://github.com/affinidi/affinidi-tdk-rs
-git clone -b feat/tsp-rev2-rev3-dual-handler https://github.com/OpenVTC/vta-browser-plugin pnm-browser-plugin   # tsp-js (Rev 3 is not on main yet)
+git clone https://github.com/OpenVTC/vta-browser-plugin pnm-browser-plugin   # tsp-js
 git clone https://github.com/affinidi/affinidi-tsp-go
 git clone https://github.com/affinidi/affinidi-tsp-dart
 ```
@@ -163,13 +166,14 @@ The report and driver logs are uploaded as the `conformance-report` artifact.
 features = ["pq"]`. Stateless ops use `message::direct` (`pack_padded`,
 `pack_sealed_box`, `pack_signed_only`, `pack_pq`, `pack_referral_invite`,
 `unpack_with`) and `message::routed`; endpoint ops use `TspAgent`. Not
-expressible: ephemeral-key injection, a NULL ESSR field, caller nonce on `XPAD`,
+expressible: ephemeral-key injection, a NULL ESSR field (refused in a
+confidential payload, as 1.0 requires), caller nonce on `XPAD`,
 padding with the sealed box / signed-only / PQ / routed / referral paths.
 `open` does not surface the padding or the ESSR field.
 
-**reference-rust** — `tsp_sdk = "=0.11.0"`, `default-features = false,
-features = ["serialize", "nacl", "pq"]` (0.11.0 is the first release to emit
-`YTSP-AAC`; 0.10.0 emitted `ABA`). Stateless ops use `crypto::seal_*`,
+**reference-rust** — `tsp_sdk = "=0.16.0"`, `default-features = false,
+features = ["serialize", "nacl", "pq"]` (0.16.0 is the first release at TSP
+1.0, `YTSP-BAA`; 0.11.0–0.15.x emitted Rev 3's `AAC`). Stateless ops use `crypto::seal_*`,
 `crypto::open`, `crypto::sign`/`verify`; `seal_reproducibly` when a caller nonce
 is given; `SecureStore` `SendOptions` when padding is (scs/ctl/pad only).
 Endpoint ops use one `SecureStore` per endpoint. Not expressible:
