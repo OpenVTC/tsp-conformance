@@ -202,9 +202,15 @@ TspPayload _payloadIn(Map<String, Object?> p, TspScheme scheme) {
                 : MlDsa65SigningKey(sk),
           );
         } else {
+          final sig = _unb64(r['signature'], 'referral.signature');
           referral = Referral(
             vid: vid,
-            signature: _unb64(r['signature'], 'referral.signature'),
+            signature: sig,
+            // The signature's length names its scheme: 64 bytes is Ed25519.
+            algorithm:
+                sig.length == TspSignatureAlgorithm.ed25519.signatureLength
+                ? TspSignatureAlgorithm.ed25519
+                : TspSignatureAlgorithm.mlDsa65,
           );
         }
       }
@@ -405,13 +411,28 @@ final class Driver {
       }
     }
 
-    final packed = await Tsp.pack(
-      sender: sender.privateVid(),
-      receiver: receiver.publicVid(),
-      payload: payload,
-      scheme: scheme,
-      options: TspPackOptions(payloadSender: senderMode, ephemeral: ephemeral),
-    );
+    final options = TspPackOptions(payloadSender: senderMode);
+    // Fixed encryption randomness is test-vector-only API since the library
+    // split it out of TspPackOptions.
+    final packed = ephemeral == null
+        ? await Tsp.pack(
+            sender: sender.privateVid(),
+            receiver: receiver.publicVid(),
+            payload: payload,
+            scheme: scheme,
+            options: options,
+          )
+        // A conformance driver is a test harness, and only `deterministic`
+        // requests (Appendix A re-packs) reach this.
+        // ignore: invalid_use_of_visible_for_testing_member
+        : await Tsp.packForTestVector(
+            sender: sender.privateVid(),
+            receiver: receiver.publicVid(),
+            payload: payload,
+            ephemeral: ephemeral,
+            scheme: scheme,
+            options: options,
+          );
     return {
       'message': _b64(packed.bytes),
       'digest': packed.digest == null ? null : _b64(packed.digest!.bytes),

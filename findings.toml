@@ -53,10 +53,8 @@ match = [".*"]
 spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
 explanation = """
 affinidi-tsp-dart `main` packs `YTSP-AAC` and refuses MAJOR 1, so every case pairing it with a 1.0 \
-implementation, and every 1.0 vector, fails on the version. Separately, its driver no longer builds from a \
-fresh checkout: the library became a workspace (`packages/affinidi_tsp`), and `drivers/dart/pubspec.yaml` \
-still points at the repository root. Until the library moves to 1.0 every failure involving it is attributed \
-here — remove this entry when it does."""
+implementation, and every 1.0 vector, fails on the version. Until the library moves to 1.0 every failure \
+involving it is attributed here — remove this entry when it does."""
 
 [[finding]]
 id = "go-rev3-inner"

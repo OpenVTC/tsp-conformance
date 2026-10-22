@@ -1,8 +1,8 @@
 # TSP 1.0 conformance report
 
-Target **trustoverip/tswg-tsp-specification** at commit `ccda6b3` (`YTSP-BAA`). Generated 2026-10-22T18:22:13Z with key seed `20261022`.
+Target **trustoverip/tswg-tsp-specification** at commit `ccda6b3` (`YTSP-BAA`). Generated 2026-10-22T18:38:57Z with key seed `20261022`.
 
-> **Note:** TSP 1.0. Built from affinidi-tdk-rs main 7609754e (affinidi-tsp 0.3.0, test-vectors), vta-browser-plugin main a24e498f (@openvtc/vti-tsp-js 0.4.0), tsp_sdk 0.16.0 from crates.io, and affinidi-tsp-go / affinidi-tsp-dart main, which are still Rev 3 (YTSP-AAC). The Go and Dart drivers ran from the main checkout of this repository (cwd override); the Dart binary is a previous build, as its driver no longer builds from a fresh checkout (see finding dart-rev3).
+> **Note:** TSP 1.0. Built from affinidi-tdk-rs main 7609754e (affinidi-tsp 0.3.0, test-vectors), vta-browser-plugin main a24e498f (@openvtc/vti-tsp-js 0.4.0), tsp_sdk 0.16.0 from crates.io, affinidi-tsp-go main d32ca7c and affinidi-tsp-dart main a64814c, which are still Rev 3 (YTSP-AAC). The Go driver ran from this repository's main checkout and the Dart driver from a copy of this branch's (cwd overrides; neither differs from what is committed here but the Dart pubspec path and API fix).
 
 Each case is **pass**, **fail** (with the diff), **skip** (a capability the implementation does not offer) or **error** (the harness or a driver broke). Cells read `✓ passed/ran` when nothing failed, `✗ passed/ran` when something did, `–` when every case skipped.
 
@@ -699,7 +699,7 @@ go refused to open the spec's message: [version] tsp: version: unsupported TSP m
 
 **Kind:** `spec-violation` · **Spec:** §9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability
 
-affinidi-tsp-dart `main` packs `YTSP-AAC` and refuses MAJOR 1, so every case pairing it with a 1.0 implementation, and every 1.0 vector, fails on the version. Separately, its driver no longer builds from a fresh checkout: the library became a workspace (`packages/affinidi_tsp`), and `drivers/dart/pubspec.yaml` still points at the repository root. Until the library moves to 1.0 every failure involving it is attributed here — remove this entry when it does.
+affinidi-tsp-dart `main` packs `YTSP-AAC` and refuses MAJOR 1, so every case pairing it with a 1.0 implementation, and every 1.0 vector, fails on the version. Until the library moves to 1.0 every failure involving it is attributed here — remove this entry when it does.
 
 Observed in 347 case(s); for example `vectors/control-rfa-direct/open` (spec → dart):
 
