@@ -97,8 +97,18 @@ fn mutations() -> Vec<Mutation> {
             expect: &["version"],
             apply: |_, s, m| {
                 let mut t = s.text.clone().into_bytes();
-                t[m.version_start + 1] = b'B';
+                t[m.version_start + 1] = b'C';
                 same(s, String::from_utf8(t).unwrap())
+            },
+        },
+        Mutation {
+            name: "draft-version-rev3",
+            spec: "§9.1 MAJOR gates processability; Rev 3 (YTSP-AAC, 0.2) is not 1.0",
+            expect: &["version"],
+            apply: |_, s, m| {
+                let mut t = s.text.clone();
+                t.replace_range(m.version_start + 1..m.version_start + 4, "AAC");
+                same(s, t)
             },
         },
         Mutation {
@@ -285,6 +295,7 @@ pub fn run(ctx: &mut Ctx, r: usize) {
     }
     digest_resigned(ctx, r);
     resigned_signed_only(ctx, r);
+    null_sender_sealed(ctx, r);
 }
 
 fn judge(ctx: &mut Ctx, r: usize, mt: &Mutated, expect: &[&str], what: &str, source: &str) -> Outcome {
@@ -383,6 +394,43 @@ fn digest_resigned(ctx: &mut Ctx, r: usize) {
 /// Edits to the published signed-only vector that only a check *after* the
 /// signature can catch, because the message is re-signed with alice's
 /// published key.
+/// A 1.0 HPKE-Base message whose confidential payload carries the NULL VID in
+/// its ESSR sender field — which Rev 3 allowed and 1.0 forbids (§3.2, §3.7
+/// step 7). No conformant packer writes one, so the runner seals it
+/// (`seal.rs`), alongside a control carrying the sender's VID that must open.
+fn null_sender_sealed(ctx: &mut Ctx, r: usize) {
+    let case = "sealed/hpke-base-scs/essr-sender-null";
+    if !ctx.selected(SUITE, case) {
+        return;
+    }
+    let spec = "§3.2, §3.7 step 7 (1.0: a confidential payload MUST carry VID_sndr)";
+    let rname = ctx.name(r);
+    let caps = vec!["hpke-base".to_string(), "payload.scs".to_string()];
+    if let Some(o) = ctx.gate(r, &caps, Dir::Open) {
+        ctx.record(SUITE, case, spec, "runner-sealed", &rname, o);
+        return;
+    }
+    let a = ctx.keys.ident("alice");
+    let b = ctx.keys.ident("bob");
+    let (s1, s2) = (ctx.keys.bytes::<32>(), ctx.keys.bytes::<32>());
+    let control = crate::seal::seal_scs(&a, &b, &a.id, b"control", s1);
+    let probe = crate::seal::seal_scs(&a, &b, "", b"null essr", s2);
+    let o = match (control, probe) {
+        (Some(control), Some(probe)) => match ctx.open_raw(r, &b, &a, &control) {
+            Reply::Ok(_) => {
+                let mt = Mutated { text: probe, receiver: b, sender: a };
+                judge(ctx, r, &mt, &["sender", "malformed"], "a NULL ESSR sender in a confidential payload", "runner-sealed")
+            }
+            other => Outcome::skip(format!(
+                "the runner-sealed control (sender present) does not open ({}), so the probe proves nothing",
+                other.describe()
+            )),
+        },
+        _ => Outcome::error("harness could not seal the probe"),
+    };
+    ctx.record(SUITE, case, spec, "runner-sealed", &rname, o);
+}
+
 fn resigned_signed_only(ctx: &mut Ctx, r: usize) {
     use crate::resign::{payload, payload_body, resign, var_field, with_payload};
     let rname = ctx.name(r);

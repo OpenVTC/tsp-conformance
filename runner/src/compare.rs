@@ -1,6 +1,6 @@
 //! Field-by-field comparison of an `open` result against an expectation.
 
-use crate::model::short;
+use crate::model::{SPEC_MARKER, short};
 use serde_json::Value;
 
 /// What the ESSR sender field inside the payload should be.
@@ -8,8 +8,9 @@ use serde_json::Value;
 pub enum SenderExpect {
     /// The packer was told (or the scheme requires) exactly this.
     Exactly(Option<String>),
-    /// The packer took its library default: NULL or the envelope sender are
-    /// both conformant under HPKE-Base and signed-only.
+    /// The packer took its library default in a non-confidential (signed-only)
+    /// payload, where NULL or the envelope sender are both conformant (§3.7
+    /// step 7). A confidential payload must carry the sender: `Exactly`.
     NullOr(String),
 }
 
@@ -43,7 +44,7 @@ pub fn compare(exp: &Expect, got: &Value) -> Comparison {
             let (maj, min) = (v["major"].as_u64(), v["minor"].as_u64());
             if (maj, min) != (Some(exp.version.0), Some(exp.version.1)) {
                 c.diffs.push(format!(
-                    "version: expected {}.{} (YTSP-AAC), got {}",
+                    "version: expected {}.{} ({SPEC_MARKER}), got {}",
                     exp.version.0,
                     exp.version.1,
                     short(v)
@@ -184,7 +185,7 @@ mod tests {
 
     fn exp() -> Expect {
         Expect {
-            version: (0, 2),
+            version: crate::model::SPEC_VERSION,
             sender: "did:a".into(),
             receiver: Some("did:b".into()),
             scheme: "hpke-base".into(),
@@ -194,7 +195,7 @@ mod tests {
     }
 
     fn got() -> Value {
-        json!({"version": {"major": 0, "minor": 2}, "envelopeSender": "did:a", "envelopeReceiver": "did:b",
+        json!({"version": {"major": 1, "minor": 0}, "envelopeSender": "did:a", "envelopeReceiver": "did:b",
                "scheme": "hpke-base",
                "payload": {"type": "rfi", "digest": "AAAA", "digestAlg": "sha2-256", "nonce": "BBBB", "replyPath": [], "referral": null}})
     }

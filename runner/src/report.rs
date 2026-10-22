@@ -159,10 +159,10 @@ pub fn markdown(rep: &Report) -> String {
     let ran: Vec<&DriverEntry> = rep.drivers.iter().filter(|d| d.status == "ran").collect();
     let names: Vec<String> = ran.iter().map(|d| d.name.clone()).collect();
 
-    let _ = writeln!(md, "# TSP Rev 3 conformance report\n");
+    let _ = writeln!(md, "# TSP 1.0 conformance report\n");
     let _ = writeln!(
         md,
-        "Target **{}** at commit `{}` (`YTSP-AAC`). Generated {} with key seed `{}`.\n",
+        "Target **{}** at commit `{}` (`YTSP-BAA`). Generated {} with key seed `{}`.\n",
         rep.spec["spec"].as_str().unwrap_or("?"),
         rep.spec["commit"].as_str().unwrap_or("?"),
         rep.generated_at,

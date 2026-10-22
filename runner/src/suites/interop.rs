@@ -125,8 +125,9 @@ fn rfa_answers_receiver(ctx: &mut Ctx, p: usize, r: usize) -> Outcome {
 }
 
 /// Referral invite, plus an oracle check of `Signature_new` when R reports it:
-/// §9.4.1 has it made by VID_new's key over {XRFI, VID_sndr | 4BAA, Digest,
-/// Nonce, Reply_Path, VID_new}.
+/// §9.4.1 has it made by VID_new's key over {XRFI, VID_sndr, Digest, Nonce,
+/// Reply_Path, VID_new}. 1.0 makes VID_sndr the sender's VID; under Rev 3 a
+/// packer could put the NULL VID there.
 fn rfi_referral(ctx: &mut Ctx, p: usize, r: usize) -> Outcome {
     use crate::resign::{count_code, var_field};
     let (a, b) = pair(ctx);
@@ -159,17 +160,60 @@ fn rfi_referral(ctx: &mut Ctx, p: usize, r: usize) -> Outcome {
     let vk_bytes: [u8; 32] = crate::model::unb64(&new.pk_s).try_into().unwrap();
     let vk = ed25519_dalek::VerifyingKey::from_bytes(&vk_bytes).unwrap();
     let sig = ed25519_dalek::Signature::from_bytes(&sig);
-    let ok = [var_field('B', a.id.as_bytes()), var_field('B', b"")]
-        .iter()
-        .any(|sf| vk.verify_strict(&challenge(sf), &sig).is_ok());
-    if !ok {
+    if vk.verify_strict(&challenge(&var_field('B', a.id.as_bytes())), &sig).is_err() {
         let pn = ctx.name(p);
         return Outcome::fail(
-            "Signature_new does not verify under VID_new's key over {XRFI, VID_sndr, Digest, Nonce, Reply_Path, VID_new} (tried VID_sndr present and NULL)",
+            "Signature_new does not verify under VID_new's key over {XRFI, VID_sndr, Digest, Nonce, Reply_Path, VID_new}",
             format!("{pn}'s referral Signature_new does not match the §9.4.1 challenge"),
         );
     }
     o
+}
+
+/// 1.0 (§3.2, §3.7 step 7) requires the sender's VID in every confidential
+/// payload, so a request to pack the NULL VID there must be refused. Any
+/// refusal — `unsupported` included — passes; packing it fails, and so does R
+/// opening what P packed.
+fn null_sender_refused(ctx: &mut Ctx, p: usize, r: usize) -> Outcome {
+    let (a, b) = pair(ctx);
+    let mut input = scs(b"null essr");
+    input["payloadSender"] = Value::Null;
+    if let Some(o) = ctx.gate(p, &payload_caps("hpke-base", &input, Dir::Pack), Dir::Pack) {
+        return o;
+    }
+    let pname = ctx.name(p);
+    let reply = ctx.call(
+        p,
+        "pack",
+        json!({
+            "scheme": "hpke-base",
+            "sender": a.private(),
+            "receiver": b.public(),
+            "payload": input,
+            "ephemeral": null,
+        }),
+    );
+    match reply {
+        crate::driver::Reply::Err { code, message } => {
+            let mut o = Outcome::pass();
+            o.detail = format!("{pname} refused: [{code}] {message}");
+            o
+        }
+        crate::driver::Reply::Broken(m) => Outcome::error(m),
+        crate::driver::Reply::Ok(v) => {
+            let rname = ctx.name(r);
+            let message = v["message"].as_str().unwrap_or_default().to_string();
+            let opened = ctx.open_raw(r, &b, &a, &message);
+            let tail = match opened {
+                crate::driver::Reply::Ok(_) => format!("; {rname} accepted it too"),
+                _ => String::new(),
+            };
+            Outcome::fail(
+                format!("{pname} packed a confidential payload with a NULL ESSR sender{tail}"),
+                format!("{pname} packs a NULL ESSR sender under HPKE-Base"),
+            )
+        }
+    }
 }
 
 fn nested_with(ctx: &mut Ctx, inner_packer: usize, p: usize, r: usize) -> Outcome {
@@ -288,12 +332,7 @@ pub fn cases() -> Vec<Case> {
             let (a, b) = pair(c);
             simple(c, p, r, "sealed-box", &a, &b, scs(b"legacy sealed box"))
         }),
-        case!("scs/hpke-base/payload-sender-null", "§3.2, §8.2.2 (ESSR NULL)", |c, p, r| {
-            let (a, b) = pair(c);
-            let mut i = scs(b"null essr");
-            i["payloadSender"] = Value::Null;
-            simple(c, p, r, "hpke-base", &a, &b, i)
-        }),
+        case!("scs/hpke-base/payload-sender-null-refused", "§3.2, §8.2.2 (1.0: a confidential payload MUST carry VID_sndr)", null_sender_refused),
         case!("scs/hpke-base/payload-sender-present", "§3.2, §8.2.2 (ESSR present)", |c, p, r| {
             let (a, b) = pair(c);
             let mut i = scs(b"explicit essr");

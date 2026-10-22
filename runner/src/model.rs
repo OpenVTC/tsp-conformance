@@ -6,6 +6,12 @@ use rand_chacha::ChaCha20Rng;
 use rand_core::{RngCore, SeedableRng};
 use serde_json::{Map, Value, json};
 
+/// The TSP version this suite targets, `(MAJOR, MINOR)`: 1.0, the released
+/// specification.
+pub const SPEC_VERSION: (u64, u64) = (1, 0);
+/// [`SPEC_VERSION`] as the qb64 marker printed in the specification.
+pub const SPEC_MARKER: &str = "YTSP-BAA";
+
 pub fn b64(b: &[u8]) -> String {
     URL_SAFE_NO_PAD.encode(b)
 }

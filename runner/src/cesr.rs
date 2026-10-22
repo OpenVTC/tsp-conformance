@@ -259,7 +259,7 @@ pub struct MessageMap {
     /// The `-E` count code, `(start, end)`.
     pub frame_code: (usize, usize),
     pub frame_quadlets: usize,
-    /// `YTSP-AAC`: the `-AAC` part is `(version_start, version_start + 4)`.
+    /// `YTSP-BAA`: the `-BAA` part is `(version_start, version_start + 4)`.
     pub version_start: usize,
     pub sender: Field,
     #[allow(dead_code)]

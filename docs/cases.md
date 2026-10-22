@@ -1,7 +1,7 @@
 # Case catalogue
 
-Every case the runner executes, what it asserts, and the section of TSP Rev 3
-(`trustoverip/tswg-tsp-specification` `f5b8668`) it traces to. Section numbers
+Every case the runner executes, what it asserts, and the section of TSP 1.0
+(`trustoverip/tswg-tsp-specification` `ccda6b3`) it traces to. Section numbers
 follow the specification's own numbering (§9.4.1 is *TSP_RFI* encoding, and so
 on); "A" is Appendix A.
 
@@ -15,9 +15,9 @@ Case ids are `suite/case`; `--case <substring>` selects by them.
   (`data`, `digest`, `replyDigest`, `digestAlg`, `nonce`, `replyPath`,
   `referral.vid`, `hops`, `inner`), plus `padding` and `payloadSender` when the
   opener reports them (driver protocol §7.1).
-- **ESSR sender.** When the packer took its default, `payloadSender` may be
-  NULL or the envelope sender under HPKE-Base and signed-only (§3.2, §8.2.2);
-  under the sealed box it must be the sender (§8.3.2).
+- **ESSR sender.** In a confidential payload (HPKE-Base, PQ, sealed box)
+  `payloadSender` must be the envelope sender (1.0: §3.2, §3.7 step 7). Only a
+  signed-only payload may leave it NULL when the packer took its default.
 - **Digests.** For `rfi`/`rfa` the digest the packer reported must equal the
   digest the opener decoded; the opener is required to have verified it
   (driver protocol §4 `open`), so a pass means both derived the same SAID
@@ -41,9 +41,9 @@ For each of the ten Appendix A vectors (`direct-sealed-box`, `direct-hpke-base`,
 | `nested-direct/inner-open`, `routed/inner-open` | The inner message opens with `nested_alice`/`nested_bob` and matches `innerPayload` | A; §4, §5.3 |
 | `<vector>/pack-exact` | `pack` with the vector's `ikmE`/`skEm`, nonce and padding reproduces `message` byte for byte. Needs `deterministic`, except `direct-signed-only`, which has no randomness at all (Ed25519) and is attempted for every signed-only packer. `direct-hpke-base-pq` publishes no ephemeral value and always skips | A (preamble) |
 | `<vector>/peek` | Keyless envelope view: sender, receiver, `confidential`, version if reported | §3.1, §5.1 |
-| `direct-signed-only/resigned/minor-ABA-accepted` | Version count rewritten to `YTSP-ABA` (what tsp_sdk 0.10 emitted) and re-signed with alice's published key: must open, reporting 0.64 | §9.1 (MINOR does not gate) |
-| `direct-signed-only/resigned/minor-AAD-accepted` | Same with a later MINOR `AAD` | §9.1 |
-| `direct-signed-only/resigned/essr-sender-present-accepted` | ESSR field changed from NULL to alice's VID and re-signed: must open | §3.7 step 7 |
+| `direct-signed-only/resigned/minor-BAB-accepted` | Version count rewritten to `YTSP-BAB` and re-signed with alice's published key: must open, reporting 1.1 | §9.1 (MINOR does not gate) |
+| `direct-signed-only/resigned/minor-BBA-accepted` | Same with `YTSP-BBA`: MINOR is the whole 12-bit count, so 1.64 | §9.1 |
+| `direct-signed-only/resigned/essr-sender-present-accepted` | ESSR field changed from NULL to alice's VID and re-signed: a non-confidential payload may carry either, so must open | §3.7 step 7 |
 
 ## 2. `interop` — every ordered pair, including self-pairs
 
@@ -59,7 +59,7 @@ P packs, R opens. All HPKE-Base unless named.
 | `scs/hpke-base/padding-12286` | smallest long padding (`9AAB####`) | §9.2.4 |
 | `scs/signed-only` | non-confidential application message | §3.5 |
 | `scs/sealed-box` | libsodium sealed box | §8.3, §9.2.8 |
-| `scs/hpke-base/payload-sender-null` | ESSR field requested NULL | §3.2, §8.2.2 |
+| `scs/hpke-base/payload-sender-null-refused` | ESSR field requested NULL: P must refuse to pack it (any error passes); packing it fails, noting whether R also accepted it | §3.2, §3.7 step 7 (1.0) |
 | `scs/hpke-base/payload-sender-present` | ESSR field requested = sender | §3.2, §8.2.2 |
 | `scs/hpke-base/long-vid` | 13 000-byte sender VID (`7AAB####` in the envelope) | §9.1 |
 | `scs/hpke-pq` | MLKEM768-X25519 + ML-DSA-65 (`pq_alice` → `pq_bob`) | §8.2.3, §9.5.2 |
@@ -68,7 +68,7 @@ P packs, R opens. All HPKE-Base unless named.
 | `rfi/hpke-base/direct` | invite with a caller nonce; R's decoded digest = P's | §7.2.1, §7.2.2, §9.4.1 |
 | `rfi/hpke-base/reply-path` | invite with a two-hop Reply_Path | §7.2.4, §9.4.1 |
 | `rfi/hpke-base/long-reply-path` | Reply_Path over 4095 quadlets (`--J#####`) | §9.4.1 |
-| `rfi/hpke-base/referral` | invite with Referral_Field; additionally, when R reports `Signature_new`, the runner verifies it under VID_new's key over {XRFI, VID_sndr\|4BAA, Digest, Nonce, Reply_Path, VID_new} | §7.2.5, §9.4.1 |
+| `rfi/hpke-base/referral` | invite with Referral_Field; additionally, when R reports `Signature_new`, the runner verifies it under VID_new's key over {XRFI, VID_sndr, Digest, Nonce, Reply_Path, VID_new} (1.0: VID_sndr is the sender's VID, never NULL) | §7.2.5, §9.4.1 |
 | `rfi/hpke-base/padded` | invite with padding — the SAID must exclude it | §7.2.1 |
 | `rfi/sealed-box` | invite under the sealed box: Blake2b-256 digest (`F`) | §7.2.1, §8.3 |
 | `rfi/hpke-pq` | invite between post-quantum identities | §7.2.1, §8.2.3 |
@@ -99,7 +99,8 @@ output (`self/hpke-base`) and the vectors `direct-hpke-base`,
 | `flip-signature` | signature | §3.4, §3.7 step 5, §9.5 |
 | `flip-envelope-sender` | signature / sender | §3.7, §8.2.2 (aad) |
 | `flip-version-minor` | signature / decrypt | §9.1 (MINOR is signed and in the aad) |
-| `unknown-major-version` (`-AAC` → `-BAC`) | version | §9.1 |
+| `unknown-major-version` (`-BAA` → `-CAA`) | version | §9.1 |
+| `draft-version-rev3` (`-BAA` → `-AAC`: Rev 3, 0.2) | version | §9.1 (MAJOR gates; a draft is not 1.0) |
 | `truncate-one-triplet`, `truncate-half` | malformed | §9.1, §9.5 |
 | `trailing-bytes` (one extra zero triplet) | malformed | §9.1, §9.5 |
 | `frame-count-too-large`, `frame-count-too-small` (`-E` ±1) | malformed | §9.1 |
@@ -109,8 +110,7 @@ output (`self/hpke-base`) and the vectors `direct-hpke-base`,
 | `wrong-sender-key` (same VID, other Ed25519 key) | signature | §3.7 step 5 |
 
 Re-signed cases — the edit is followed by a fresh signature with the sender's
-key, so only the check under test can catch it (signed-only messages only; the
-runner implements no HPKE):
+key, so only the check under test can catch it (signed-only messages only):
 
 | Case | Edit | Expected | Spec |
 |---|---|---|---|
@@ -121,6 +121,15 @@ runner implements no HPKE):
 | `resigned/direct-signed-only/xscs-body-h-group-json` | the `-A##` stream holds an `-H##` group with a JSON Bytes primitive | malformed | tswg-tsp-specification#77; §9.2.3 |
 | `resigned/direct-signed-only/xscs-body-two-bytes-primitives` | the `-A##` stream holds two Bytes primitives | malformed | tswg-tsp-specification#77 |
 | `resigned/direct-signed-only/xscs-body-data-after-stream` | one primitive, then another field after the `-A##` stream inside the `-Z` frame (counts adjusted) | malformed | tswg-tsp-specification#77 |
+
+Sealed case — the one confidential probe no conformant packer can produce, so
+the runner seals it itself with RFC 9180 HPKE-Base (`runner/src/seal.rs`). A
+control sealed the same way but naming the sender must open first; if it does
+not, the case skips, since the probe would prove nothing.
+
+| Case | Message | Expected | Spec |
+|---|---|---|---|
+| `sealed/hpke-base-scs/essr-sender-null` | a 1.0 HPKE-Base XSCS whose ESSR sender field is the NULL VID `4BAA` | sender / malformed | §3.2, §3.7 step 7 (1.0) |
 
 The #77 cases need a signed-only reader; tsp-js has none, so they skip there
 (its unit test `tests/payload.app-stream.mjs` covers the same three bodies).

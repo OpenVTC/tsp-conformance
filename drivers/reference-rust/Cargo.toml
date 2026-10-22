@@ -13,10 +13,10 @@ name = "tsp-driver-reference"
 path = "src/main.rs"
 
 [dependencies]
-# 0.11.0 is the first release emitting YTSP-AAC (MAJOR.MINOR); 0.10.0 emitted ABA.
+# 0.16.0 is the first release at TSP 1.0 (YTSP-BAA); 0.11.0–0.15.x emitted Rev 3's YTSP-AAC.
 # `async` (the default) drags in askar/tokio/transports that stateless and
 # SecureStore ops do not need.
-tsp_sdk = { version = "=0.11.0", default-features = false, features = ["serialize", "nacl", "pq"] }
+tsp_sdk = { version = "=0.16.0", default-features = false, features = ["serialize", "nacl", "pq"] }
 serde_json = "1"
 base64 = "0.22"
 getrandom = "0.2"

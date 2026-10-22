@@ -115,8 +115,10 @@ struct PackInput {
 }
 
 /// `deterministic` is whether the request goes through the crate's
-/// `insecure_deterministic` packer, which can write a NULL ESSR sender and take
-/// a `pad` nonce; the public packing functions can do neither.
+/// `insecure_deterministic` packer, which can write a NULL ESSR sender in a
+/// signed-only payload and take a `pad` nonce; the public packing functions can
+/// do neither. TSP 1.0 forbids a NULL sender in a confidential payload, and the
+/// crate refuses it under every packer.
 fn build_pack_input(
     scheme: &Scheme,
     sender: &Identity,
@@ -124,10 +126,17 @@ fn build_pack_input(
     deterministic: bool,
 ) -> DResult<PackInput> {
     // The public packing functions always write the ESSR sender field (direct.rs
-    // `encode_sender_field`); only the deterministic packer can write NULL.
+    // `encode_sender_field`); only the deterministic packer can write NULL, and
+    // only where 1.0 allows it — a signed-only payload.
     let mut null_sender = false;
     if let Some(ps) = payload.get("payloadSender") {
         match ps {
+            Value::Null if !matches!(scheme, Scheme::SignedOnly) => {
+                return Err(err(
+                    "invalid-input",
+                    "TSP 1.0 requires the sender VID in a confidential payload (§3.2, §3.7 step 7)",
+                ));
+            }
             Value::Null if deterministic => null_sender = true,
             Value::Null => {
                 return Err(unsupported(
@@ -722,7 +731,7 @@ fn main() {
     proto::run(|op, req| match op {
         "hello" => Ok(json!({
             "name": "affinidi-tsp",
-            "version": "0.2.0",
+            "version": "0.3.0",
             "language": "rust",
             "protocol": 1,
             "capabilities": capabilities(),

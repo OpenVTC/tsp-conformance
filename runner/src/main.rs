@@ -1,4 +1,4 @@
-//! `tsp-conformance` — cross-implementation conformance runner for TSP Rev 3.
+//! `tsp-conformance` — cross-implementation conformance runner for TSP 1.0.
 
 mod cesr;
 mod compare;
@@ -8,6 +8,7 @@ mod model;
 mod report;
 mod resign;
 mod result;
+mod seal;
 mod suites;
 
 use clap::Parser;
@@ -22,7 +23,7 @@ use std::time::Duration;
 const ALL_SUITES: &[&str] = &["vectors", "interop", "negative", "relationship"];
 
 #[derive(Parser, Debug)]
-#[command(name = "tsp-conformance", about = "Cross-implementation conformance runner for TSP Rev 3")]
+#[command(name = "tsp-conformance", about = "Cross-implementation conformance runner for TSP 1.0")]
 struct Args {
     /// Driver configuration.
     #[arg(long, default_value = "drivers.toml")]

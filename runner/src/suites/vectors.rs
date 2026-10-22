@@ -4,7 +4,7 @@ use crate::cesr::{self, DecodedPayload};
 use crate::compare::{Expect, SenderExpect};
 use crate::ctx::{Ctx, payload_caps};
 use crate::driver::{Dir, Reply};
-use crate::model::{Ident, b64};
+use crate::model::{Ident, SPEC_VERSION, b64};
 use crate::result::{Outcome, normalize};
 use serde_json::{Value, json};
 
@@ -31,6 +31,7 @@ fn spec_of(name: &str) -> &'static str {
         "control-rfa-direct" => "A; §7.2.2, §9.4.2",
         "control-rfd" => "A; §7.3, §9.4.5",
         "control-rfi-sealed-box" => "A; §7.2.1, §8, §9.4.1",
+        "control-rfi-referral" => "A; §7.2.5, §9.4.1 (Referral_Field, Signature_new)",
         "nested-direct" => "A; §4, §9.4.15",
         "routed" => "A; §5.2, §5.3.3, §9.4.16",
         "direct-hpke-base-pq" => "A; §8.2, §8.3, §9.2.8",
@@ -155,7 +156,7 @@ fn peek_case(ctx: &mut Ctx, i: usize, scheme: &str, s: &Ident, r: &Ident, messag
             };
             if v.get("version").is_none() {
                 o.unreported.push("peek.version".into());
-            } else if v["version"] != json!({"major": 0, "minor": 2}) {
+            } else if v["version"] != json!({"major": SPEC_VERSION.0, "minor": SPEC_VERSION.1}) {
                 o = Outcome::fail(format!("version: got {}", v["version"]), format!("{name} peek reports a different version"));
             }
             o
@@ -196,9 +197,9 @@ fn derived_signed_only(ctx: &mut Ctx, i: usize) {
         Some(with_payload(&text, &map, &payload(&new_body)))
     };
     let cases: Vec<(&str, &str, Option<String>, (u64, u64), Option<String>)> = vec![
-        ("minor-ABA-accepted", "§9.1 (MINOR does not gate; tsp_sdk 0.10 emitted YTSP-ABA)", set_minor("ABA"), (0, 64), None),
-        ("minor-AAD-accepted", "§9.1 (a later MINOR is still processable)", set_minor("AAD"), (0, 3), None),
-        ("essr-sender-present-accepted", "§3.7 step 7 (ESSR field MAY carry VID_sndr)", essr_present(), (0, 2), Some(alice.id.clone())),
+        ("minor-BAB-accepted", "§9.1 (a later MINOR is still processable)", set_minor("BAB"), (1, 1), None),
+        ("minor-BBA-accepted", "§9.1 (MINOR is the whole 12-bit count: 1.64)", set_minor("BBA"), (1, 64), None),
+        ("essr-sender-present-accepted", "§3.7 step 7 (a non-confidential payload MAY carry VID_sndr)", essr_present(), SPEC_VERSION, Some(alice.id.clone())),
     ];
     for (name, spec, derived, version, ps) in cases {
         let case = format!("direct-signed-only/resigned/{name}");
@@ -250,7 +251,7 @@ fn open_case(
         return o;
     }
     let exp = Expect {
-        version: (0, 2),
+        version: SPEC_VERSION,
         sender: sender.id.clone(),
         receiver: Some(receiver.id.clone()),
         scheme: scheme.into(),
@@ -333,7 +334,23 @@ fn pack_exact(
     }
     match payload["type"].as_str() {
         Some("rfa") | Some("rfd") => input["digest"] = payload["digest"].clone(),
-        Some("rfi") => input["referral"] = Value::Null,
+        // A referral's Signature_new is made by the packer with VID_new's key:
+        // the vector names VID_new (its long form, as introduced), so find the
+        // published identifier it belongs to and hand over that key.
+        Some("rfi") => {
+            input["referral"] = match payload["referral"]["vid"].as_str() {
+                None => Value::Null,
+                Some(vid) => {
+                    let owner = ctx.fixture["identifiers"].as_object().and_then(|ids| {
+                        ids.values().find(|x| x["longForm"].as_str() == Some(vid) || x["id"].as_str() == Some(vid))
+                    });
+                    match owner {
+                        Some(x) => json!({"vid": vid, "skS": x["skS"]}),
+                        None => return Outcome::error(format!("no published identifier introduces {vid}")),
+                    }
+                }
+            }
+        }
         _ => {}
     }
     if let Some(ps) = payload.get("payloadSender") {

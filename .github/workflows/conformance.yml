@@ -18,7 +18,7 @@ on:
         default: main
       vta_browser_plugin_ref:
         description: OpenVTC/vta-browser-plugin ref (tsp-js)
-        default: feat/tsp-rev2-rev3-dual-handler
+        default: main
       affinidi_tsp_go_ref:
         description: affinidi/affinidi-tsp-go ref
         default: main
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           repository: OpenVTC/vta-browser-plugin
-          ref: ${{ inputs.vta_browser_plugin_ref || 'feat/tsp-rev2-rev3-dual-handler' }}
+          ref: ${{ inputs.vta_browser_plugin_ref || 'main' }}
           path: pnm-browser-plugin
       - uses: actions/checkout@v5
         with:

@@ -1,4 +1,4 @@
-# TSP Rev 3 conformance suite.
+# TSP 1.0 conformance suite.
 #
 #   make build                 build the runner and every driver in drivers.toml
 #   make run                   run every suite over every enabled driver

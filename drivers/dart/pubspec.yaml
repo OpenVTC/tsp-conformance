@@ -8,9 +8,9 @@ environment:
 
 dependencies:
   affinidi_tsp:
-    path: ../../../affinidi-tsp-dart
+    path: ../../../affinidi-tsp-dart/packages/affinidi_tsp
   affinidi_tsp_pq:
-    path: ../../../affinidi-tsp-dart/pq
+    path: ../../../affinidi-tsp-dart/packages/affinidi_tsp_pq
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.2.1
@@ -20,4 +20,4 @@ dev_dependencies:
 # local checkout the driver uses.
 dependency_overrides:
   affinidi_tsp:
-    path: ../../../affinidi-tsp-dart
+    path: ../../../affinidi-tsp-dart/packages/affinidi_tsp

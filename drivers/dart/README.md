@@ -1,7 +1,7 @@
 # Dart driver — `affinidi_tsp`
 
 Conformance driver (protocol v1, `docs/driver-protocol.md`) for the Dart TSP
-Rev 3 library at `../../../affinidi-tsp-dart` (package `affinidi_tsp`) and its
+Rev 3 library at `../../../affinidi-tsp-dart/packages/affinidi_tsp` (a pub workspace member) and its
 post-quantum key types (`affinidi_tsp_pq`). It is a thin adapter: every byte
 it returns is produced by the library.
 

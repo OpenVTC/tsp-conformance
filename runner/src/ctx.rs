@@ -294,11 +294,12 @@ pub fn expect_from(
     let payload_sender = match input.get("payloadSender") {
         Some(Value::Null) => SenderExpect::Exactly(None),
         Some(Value::String(s)) => SenderExpect::Exactly(Some(s.clone())),
-        _ if scheme == "sealed-box" => SenderExpect::Exactly(Some(sender.id.clone())),
-        _ => SenderExpect::NullOr(sender.id.clone()),
+        // §3.7 step 7: only a non-confidential payload may leave it NULL.
+        _ if scheme == "signed-only" => SenderExpect::NullOr(sender.id.clone()),
+        _ => SenderExpect::Exactly(Some(sender.id.clone())),
     };
     Ok(Expect {
-        version: (0, 2),
+        version: crate::model::SPEC_VERSION,
         sender: sender.id.clone(),
         receiver: Some(receiver.id.clone()),
         scheme: scheme.into(),
