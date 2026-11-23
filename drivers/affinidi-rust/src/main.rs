@@ -52,7 +52,7 @@ fn capabilities() -> Vec<&'static str> {
 fn map_err(e: TspError) -> DErr {
     let message = e.to_string();
     let code = match &e {
-        TspError::Cesr(_) | TspError::InvalidMessage(_) | TspError::NotTsp(_) => "malformed",
+        TspError::InvalidMessage(_) | TspError::NotTsp(_) => "malformed",
         TspError::Hpke(_) | TspError::SealedBox(_) => "decrypt",
         TspError::Verification(m) => {
             if m.contains("TSP_Digest") {
