@@ -45,18 +45,6 @@ write a NULL ESSR sender under HPKE-Base, which 1.0 forbids. Until the library m
 involving it is attributed here — remove this entry when it does, so its remaining failures are seen."""
 
 [[finding]]
-id = "dart-rev3"
-kind = "spec-violation"
-title = "affinidi-tsp-dart still speaks Rev 3 (YTSP-AAC, 0.2), not 1.0"
-implementation = "dart"
-match = [".*"]
-spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
-explanation = """
-affinidi-tsp-dart `main` packs `YTSP-AAC` and refuses MAJOR 1, so every case pairing it with a 1.0 \
-implementation, and every 1.0 vector, fails on the version. Until the library moves to 1.0 every failure \
-involving it is attributed here — remove this entry when it does."""
-
-[[finding]]
 id = "go-rev3-inner"
 kind = "spec-violation"
 title = "a nested message whose inner message affinidi-tsp-go packed (Rev 3) is refused"
@@ -64,15 +52,6 @@ match = ["inner-by-go"]
 spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
 explanation = """See `go-rev3`. The outer parties here are 1.0 implementations, so the `implementation` \
 filter of that entry cannot reach these; the inner message is the Go library's, at YTSP-AAC."""
-
-[[finding]]
-id = "dart-rev3-inner"
-kind = "spec-violation"
-title = "a nested message whose inner message affinidi-tsp-dart packed (Rev 3) is refused"
-match = ["inner-by-dart"]
-spec = "§9.1: the current version is YTSP-BAA (1.0); MAJOR gates processability"
-explanation = """See `dart-rev3`. The outer parties here are 1.0 implementations; the inner message is the \
-Dart library's, at YTSP-AAC."""
 
 [[finding]]
 id = "sdk-non-canonical-lead-bytes"
